@@ -8,11 +8,11 @@ namespace GardeningHelperDatabase.Seed
 {
     public class SeedData
     {
-        public static async Task
-SeedDatabase(GardeningHelperDbContext context, RoleManager<Role> roleManager)
+        public static async Task SeedDatabase(GardeningHelperDbContext context, RoleManager<Role> roleManager)
         {
             await SeedRoles(roleManager);
             SeedPlants(context);
+            context.SaveChanges();
         }
 
         public static void SeedPlants(GardeningHelperDbContext context)
@@ -27,10 +27,32 @@ SeedDatabase(GardeningHelperDbContext context, RoleManager<Role> roleManager)
                 PropertyNameCaseInsensitive = true,
                 Converters = { new JsonStringEnumConverter() }
             };
+
             var plants = JsonSerializer.Deserialize<List<Plant>>(Constants.PlantsJson, options);
 
+            // Get the path to the PlantImages folder
+            string plantImagesFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "..\\GardeningHelperDatabase\\Seed\\PlantImages");
+
+            // Iterate over the plants and load their respective images
+            foreach (var plant in plants)
+            {
+                // Construct the path to the image file for the current plant
+                string imageFilePath = Path.Combine(plantImagesFolderPath, $"{plant.Name}.png");
+
+                if (File.Exists(imageFilePath))
+                {
+                    // Read the image file and convert it to a byte array
+                    byte[] imageBytes = File.ReadAllBytes(imageFilePath);
+                    plant.Image = imageBytes;
+                }
+                else
+                {
+                    // You can decide to set a default image or handle this case differently
+                    plant.Image = null; // Or load a default image if needed
+                }
+            }
+
             context.Plants.AddRange(plants);
-            context.SaveChanges();
         }
 
         public static async Task SeedRoles(RoleManager<Role> roleManager)

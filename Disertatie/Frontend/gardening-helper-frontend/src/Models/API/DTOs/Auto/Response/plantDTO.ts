@@ -9,7 +9,7 @@ export interface PlantDTO {
     soilType: any;
     growthPeriod: string;
     harvestTime: any;
-    imageUrl: string;
+    image: number[];
     minTemperature: number;
     maxTemperature: number;
     minHumidity: number;

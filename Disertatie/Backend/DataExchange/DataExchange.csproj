@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="MTT" Version="0.7.2" />
+  </ItemGroup>
+
+    <Target Name="ConvertDataExchangeToTypeScript" AfterTargets="Build">
+	    <ConvertMain WorkingDirectory="DTOs/" ConvertDirectory="./../../Frontend/gardening-helper-frontend/src/Models/API/DTOs/Auto/" />
+	    <ConvertMain WorkingDirectory="Enums/" ConvertDirectory="./../../Frontend/gardening-helper-frontend/src/Enums/API/Auto/" PropertyStyle="PascalCase" />
+    </Target>
+
+</Project>

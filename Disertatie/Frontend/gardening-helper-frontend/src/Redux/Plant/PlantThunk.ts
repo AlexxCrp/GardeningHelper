@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { PlantCardDTO } from '../../Models/API/DTOs/Auto/Response/plantCardDTO';
 import { PlantDTO } from '../../Models/API/DTOs/Auto/Response/plantDTO';
 import PlantApiClient from '../../Services/CustomApiClients/PlantApiClient';
 
@@ -28,6 +29,22 @@ export const fetchAllPlants = createAsyncThunk<
   async (_, { rejectWithValue }) => {
     try {
       return await PlantApiClient.getAll();
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch plants');
+    }
+  }
+);
+
+// Fetch plant cards
+export const fetchCardPlants = createAsyncThunk<
+  PlantCardDTO[],
+  void,
+  { rejectValue: string }
+>(
+  'plant/fetchPlantCards',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await PlantApiClient.customGet<PlantCardDTO[]>('/PlantCard');
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch plants');
     }

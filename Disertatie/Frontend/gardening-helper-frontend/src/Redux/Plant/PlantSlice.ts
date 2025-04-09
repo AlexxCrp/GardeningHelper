@@ -2,7 +2,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PlantDTO } from '../../Models/API/DTOs/Auto/Response/plantDTO';
 import { PLANTS_INITIAL_STATE } from './PlantState';
-import { createPlant, deletePlant, fetchAllPlants, fetchPlant, updatePlant } from './PlantThunk';
+import { createPlant, deletePlant, fetchAllPlants, fetchCardPlants, fetchPlant, updatePlant } from './PlantThunk';
 
 const plantSlice = createSlice({
   name: 'plants',
@@ -52,6 +52,22 @@ const plantSlice = createSlice({
       state.error = null;
     });
     builder.addCase(fetchAllPlants.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string || 'Failed to fetch plants';
+    });
+
+    //Handle fetch Plant Cards
+
+    builder.addCase(fetchCardPlants.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchCardPlants.fulfilled, (state, action) => {
+      state.plantCards = action.payload;
+      state.isLoading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchCardPlants.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload as string || 'Failed to fetch plants';
     });

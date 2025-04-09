@@ -4,6 +4,8 @@ import { RootState } from "../Store";
 // Select all plants
 export const selectAllPlants = (state: RootState) => state.plants.plants;
 
+export const selectPlantCards = (state: RootState) => state.plants.plantCards;
+
 // Select a specific plant by id
 export const selectPlantById = (id: number) => (state: RootState) => 
   state.plants.plants.find(plant => plant.id === id);

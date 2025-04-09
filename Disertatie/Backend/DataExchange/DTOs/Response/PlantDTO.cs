@@ -3,7 +3,7 @@ using DataExchange.Enums;
 
 namespace DataExchange.DTOs.Response
 {
-    public class PlantDto
+    public class PlantDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }

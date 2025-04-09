@@ -18,21 +18,21 @@
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PlantDto>>> GetAllPlants()
+        public async Task<ActionResult<List<PlantDTO>>> GetAllPlants()
         {
             var plants = await _plantService.GetAllPlantsAsync();
             return Ok(plants);
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult<List<PlantDto>>> GetPlantCards()
-        //{
-        //    var plants = await _plantService.GetPlantCards();
-        //    return Ok(plants);
-        //}
+        [HttpGet("PlantCard")]
+        public async Task<ActionResult<List<PlantCardDTO>>> GetPlantCards()
+        {
+            var plants = await _plantService.GetPlantCards();
+            return Ok(plants);
+        }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PlantDto>> GetPlantById(int id)
+        public async Task<ActionResult<PlantDTO>> GetPlantById(int id)
         {
             var plant = await _plantService.GetPlantByIdAsync(id);
             if (plant == null)
@@ -43,14 +43,14 @@
         }
 
         [HttpPost]
-        public async Task<ActionResult<PlantDto>> CreatePlant([FromBody] PlantDto createPlantDto)
+        public async Task<ActionResult<PlantDTO>> CreatePlant([FromBody] PlantDTO createPlantDto)
         {
             var createdPlant = await _plantService.CreatePlantAsync(createPlantDto);
             return CreatedAtAction(nameof(GetPlantById), new { id = createdPlant.Id }, createdPlant);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<PlantDto>> UpdatePlant(int id, [FromBody] PlantDto updatePlantDto)
+        public async Task<ActionResult<PlantDTO>> UpdatePlant(int id, [FromBody] PlantDTO updatePlantDto)
         {
             var plant = await _plantService.UpdatePlantAsync(id, updatePlantDto);
             if (plant == null)

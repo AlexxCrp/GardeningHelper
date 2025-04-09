@@ -20,37 +20,36 @@
         }
 
         // Get all plants
-        public async Task<List<PlantDto>> GetAllPlantsAsync()
+        public async Task<List<PlantDTO>> GetAllPlantsAsync()
         {
             var plants = await _dbContext.Plants.ToListAsync();
-            return _mapper.Map<List<PlantDto>>(plants);
+            return _mapper.Map<List<PlantDTO>>(plants);
         }
 
-        //public async Task<List<PlantDto>> GetPlantCards()
-        //{
-        //    var plants = await _dbContext.Plants.ToListAsync();
-
-        //    return _mapper.Map<List<PlantDto>>(plants);
-        //}
+        public async Task<List<PlantCardDTO>> GetPlantCards()
+        {
+            var plants = await _dbContext.Plants.ToListAsync();
+            return _mapper.Map<List<PlantCardDTO>>(plants);
+        }
 
         // Get a plant by ID
-        public async Task<PlantDto> GetPlantByIdAsync(int id)
+        public async Task<PlantDTO> GetPlantByIdAsync(int id)
         {
             var plant = await _dbContext.Plants.FindAsync(id);
-            return _mapper.Map<PlantDto>(plant);
+            return _mapper.Map<PlantDTO>(plant);
         }
 
         // Create a new plant
-        public async Task<PlantDto> CreatePlantAsync(PlantDto createPlantDto)
+        public async Task<PlantDTO> CreatePlantAsync(PlantDTO createPlantDto)
         {
             var plant = _mapper.Map<Plant>(createPlantDto);
             _dbContext.Plants.Add(plant);
             await _dbContext.SaveChangesAsync();
-            return _mapper.Map<PlantDto>(plant);
+            return _mapper.Map<PlantDTO>(plant);
         }
 
         // Update an existing plant
-        public async Task<PlantDto> UpdatePlantAsync(int id, PlantDto updatePlantDto)
+        public async Task<PlantDTO> UpdatePlantAsync(int id, PlantDTO updatePlantDto)
         {
             var plant = await _dbContext.Plants.FindAsync(id);
             if (plant == null)
@@ -60,7 +59,7 @@
 
             _mapper.Map(updatePlantDto, plant);
             await _dbContext.SaveChangesAsync();
-            return _mapper.Map<PlantDto>(plant);
+            return _mapper.Map<PlantDTO>(plant);
         }
 
         // Delete a plant by ID

@@ -1,0 +1,26 @@
+.plant-container {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .plant-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .loading-text, .error-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+  }
+  
+  .loading-text {
+    color: #4a9c5f;
+  }
+  
+  .error-text {
+    color: #e74c3c;
+  }

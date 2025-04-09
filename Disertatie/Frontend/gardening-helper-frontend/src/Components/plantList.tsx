@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../Redux/Hooks/ReduxHooks';
-import { selectAllPlants, selectPlantsError, selectPlantsLoading } from '../Redux/Plant/PlantSelector';
-import { fetchAllPlants } from '../Redux/Plant/PlantThunk';
+import { selectPlantCards, selectPlantsError, selectPlantsLoading } from '../Redux/Plant/PlantSelector';
+import { fetchCardPlants } from '../Redux/Plant/PlantThunk';
 
 const PlantsList: React.FC = () => {
   const dispatch = useAppDispatch();
-  const plants = useAppSelector(selectAllPlants);
+  const plants = useAppSelector(selectPlantCards);
   const isLoading = useAppSelector(selectPlantsLoading);
   const error = useAppSelector(selectPlantsError);
 
@@ -16,7 +16,7 @@ const PlantsList: React.FC = () => {
   }, [dispatch]);
 
   const handleFetchPlants = () => {
-    dispatch(fetchAllPlants());
+    dispatch(fetchCardPlants());
   };
 
   return (

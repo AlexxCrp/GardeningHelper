@@ -8,8 +8,11 @@ namespace GardeningHelperDatabase.Mappings
     {
         public PlantProfile()
         {
-            CreateMap<Plant, PlantDto>();
-            CreateMap<PlantDto, Plant>();
+            CreateMap<Plant, PlantDTO>();
+            CreateMap<PlantDTO, Plant>();
+
+            CreateMap<Plant, PlantCardDTO>();
+            CreateMap<PlantCardDTO, Plant>();
         }
     }
 }

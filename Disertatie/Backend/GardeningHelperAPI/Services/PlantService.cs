@@ -39,6 +39,12 @@
             return _mapper.Map<PlantDTO>(plant);
         }
 
+        public async Task<PlantDTO> GetPlantByNameAsync(string name)
+        {
+            var plant = await _dbContext.Plants.FirstOrDefaultAsync(x => x.Name == name);
+            return _mapper.Map<PlantDTO>(plant);
+        }
+
         // Create a new plant
         public async Task<PlantDTO> CreatePlantAsync(PlantDTO createPlantDto)
         {

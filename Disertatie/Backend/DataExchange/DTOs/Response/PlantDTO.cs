@@ -25,5 +25,8 @@ namespace DataExchange.DTOs.Response
         public int WateringThresholdDays { get; set; }
         public double WateringThresholdRainfall { get; set; }
         public StatusEnum Status { get; set; }
+        public string ImageBase64 => Image != null
+            ? $"data:image/png;base64,{Convert.ToBase64String(Image)}"
+            : null;
     }
 }

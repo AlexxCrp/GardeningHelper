@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Services;
 using System.Text;
 
 namespace GardeningHelperAPI
@@ -92,6 +93,7 @@ namespace GardeningHelperAPI
             // Add custom services
             builder.Services.AddScoped<IdentityService>();
             builder.Services.AddScoped<PlantService>();
+            builder.Services.AddScoped<GardenService>();
 
             // Configure authentication
             builder.Services.AddAuthentication(options =>
@@ -99,10 +101,10 @@ namespace GardeningHelperAPI
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer("AuthScheme", options =>
+            .AddJwtBearer(options =>
             {
                 options.SaveToken = true;
-                var secretKey = builder.Configuration.GetSection("JwtSettings:SecretKey").Get<string>() ?? "safhwegfdjgfde8943jgla4920ghd@JG)(h(W)h)S(hS@";
+                var secretKey = builder.Configuration["JwtSettings:SecretKey"];
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -112,13 +114,31 @@ namespace GardeningHelperAPI
                     RequireExpirationTime = true,
                     ValidateIssuer = false
                 };
+
+                // Add these lines to prevent redirects
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = context =>
+                    {
+                        // Skip the default redirect behavior
+                        context.HandleResponse();
+                        // Return 401 instead of redirect
+                        return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        // Handle failed authentication
+                        return Task.CompletedTask;
+                    }
+                };
             });
+
 
             // Configure authorization
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("User", policy => policy.RequireRole("User", "Admin").RequireAuthenticatedUser().AddAuthenticationSchemes("AuthScheme").Build());
-                options.AddPolicy("Admin", policy => policy.RequireRole("Admin").RequireAuthenticatedUser().AddAuthenticationSchemes("AuthScheme").Build());
+                options.AddPolicy("User", policy => policy.RequireRole("User", "Admin").RequireAuthenticatedUser());
+                options.AddPolicy("Admin", policy => policy.RequireRole("Admin").RequireAuthenticatedUser());
             });
 
             // Configure CORS
@@ -127,9 +147,10 @@ namespace GardeningHelperAPI
                 options.AddPolicy("_allowSpecificOrigins", builder =>
                 {
                     builder
-                        .WithOrigins("localhost:3000", "http://localhost:3000", "https://localhost:3000")
+                        .WithOrigins("http://localhost:3000")
                         .AllowAnyMethod()
-                        .AllowAnyHeader();
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 });
             });
 

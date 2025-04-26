@@ -40,7 +40,7 @@ namespace GardeningHelperAPI.Services
             string token = await CreateToken(user);
             var role = await userManager.GetRolesAsync(user);
 
-            return new AuthResponseDTO() { Token = token, Role = role[0] };
+            return new AuthResponseDTO() { Id = user.Id, Token = token, Role = role[0] };
 
         }
 
@@ -64,7 +64,7 @@ namespace GardeningHelperAPI.Services
             var role = await userManager.GetRolesAsync(newUser);
 
 
-            return new AuthResponseDTO() { Token = token, Role = role[0] };
+            return new AuthResponseDTO() { Id = newUser.Id, Token = token, Role = role[0] };
 
         }
 

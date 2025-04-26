@@ -21,4 +21,5 @@ export interface PlantDTO {
     wateringThresholdDays: number;
     wateringThresholdRainfall: number;
     status: any;
+    imageBase64: string;
 }

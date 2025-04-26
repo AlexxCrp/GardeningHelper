@@ -12,6 +12,7 @@ const userSlice = createSlice({
       state.error = null;
     },
     loginSuccess: (state, action: PayloadAction<AuthResponseDTO>) => {
+      state.id = action.payload.id;
       state.token = action.payload.token;
       state.role = action.payload.role;
       state.isAuthenticated = true;

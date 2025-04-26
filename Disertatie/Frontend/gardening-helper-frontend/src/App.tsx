@@ -1,11 +1,11 @@
-// src/App.tsx
+// src/App.tsx - Updated version
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
 import ProtectedRoute from './Components/Auth/ProtectedRoute';
 import Login from './Components/Login/Login';
+import Garden from './Components/MyGarden/Garden';
 import NavBar from './Components/NavBar/NavBar';
 import PlantCardContainer from './Components/PlantCardContainer/PlantCardContainer';
-import PlantsList from './Components/plantList';
 import Register from './Components/Register/Register';
 
 function App() {
@@ -24,7 +24,7 @@ function App() {
               path="/" 
               element={
                 <ProtectedRoute>
-                  <PlantsList />
+                  <Garden />
                 </ProtectedRoute>
               } 
             />

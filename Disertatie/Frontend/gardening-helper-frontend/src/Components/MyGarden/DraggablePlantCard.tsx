@@ -1,4 +1,3 @@
-// src/Components/PlantCard/DraggablePlantCard.tsx
 import React from 'react';
 import './PlantCard.css';
 
@@ -7,32 +6,48 @@ interface DraggablePlantCardProps {
   name: string;
   imageBase64?: string | null;
   isDraggable?: boolean;
+  inGardenCell?: boolean;
 }
 
 const DraggablePlantCard: React.FC<DraggablePlantCardProps> = ({ 
   id, 
   name, 
   imageBase64, 
-  isDraggable = true 
+  isDraggable = true,
+  inGardenCell = false
 }) => {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     if (!isDraggable) return;
     
-    e.dataTransfer.setData('application/json', JSON.stringify({
+    // Store complete plant data in the drag event
+    const plantData = {
       plantId: id,
-      name
-    }));
+      name,
+      imageBase64
+    };
+    
+    e.dataTransfer.setData('application/json', JSON.stringify(plantData));
+    
+    // Also store in localStorage as a backup for complex drag operations
+    localStorage.setItem('dragData', JSON.stringify(plantData));
     
     e.currentTarget.classList.add('dragging');
   };
 
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
     e.currentTarget.classList.remove('dragging');
+    // Clean up localStorage after drag operation completes
+    localStorage.removeItem('dragData');
   };
+
+  const cardClasses = [
+    'plant-card',
+    inGardenCell ? 'in-garden-cell' : ''
+  ].filter(Boolean).join(' ');
 
   return (
     <div 
-      className="plant-card"
+      className={cardClasses}
       draggable={isDraggable}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}

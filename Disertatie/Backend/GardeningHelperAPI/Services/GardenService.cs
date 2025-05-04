@@ -18,11 +18,12 @@ namespace Services
         private readonly PlantService _plantService;
         private readonly IMapper _mapper;
 
-        public GardenService(GardeningHelperDbContext dbContext, UserManager<User> userManager, IMapper mapper)
+        public GardenService(GardeningHelperDbContext dbContext, UserManager<User> userManager, PlantService plantService, IMapper mapper)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _mapper = mapper;
+            _plantService = plantService;
         }
 
         public async Task<UserGardenResponseDTO> GetUserGardenAsync(string userName)
@@ -35,7 +36,14 @@ namespace Services
             if (garden == null)
                 return null;
 
-            return _mapper.Map<UserGardenResponseDTO>(garden);
+            var response = _mapper.Map<UserGardenResponseDTO>(garden);
+            foreach (var gardenPlant in response.GardenPlants)
+            {
+                var plant = await _plantService.GetPlantByNameAsync(gardenPlant.PlantName);
+                gardenPlant.Base64Image = plant.ImageBase64;
+            }
+
+            return response;
         }
 
         public async Task<UserGardenResponseDTO> CreateGardenAsync(string userName, CreateGardenRequestDTO request)

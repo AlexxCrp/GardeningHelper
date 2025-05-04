@@ -1,8 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CreateGardenRequestDTO } from '../../Models/API/DTOs/Auto/Request/createGardenRequestDTO';
-import { selectGarden, selectGardenError, selectGardenLoading, selectIsCreatingGarden } from '../../Redux/Garden/GardenSelector';
-import { toggleCreateGardenForm } from '../../Redux/Garden/GardenSlice';
-import { addPlantToGarden, fetchUserGarden, updateGarden } from '../../Redux/Garden/GardenThunk';
+import {
+  selectGarden,
+  selectGardenError,
+  selectGardenLoading,
+  selectIsCreatingGarden,
+  selectTempGarden
+} from '../../Redux/Garden/GardenSelector';
+import {
+  addTempPlant,
+  cancelEditMode,
+  initializeEditMode,
+  toggleCreateGardenForm,
+  updateTempGardenSize
+} from '../../Redux/Garden/GardenSlice';
+import {
+  batchUpdateGarden,
+  fetchUserGarden
+} from '../../Redux/Garden/GardenThunk';
 import { useAppDispatch, useAppSelector } from '../../Redux/Hooks/ReduxHooks';
 import { selectAllPlants } from '../../Redux/Plant/PlantSelector';
 import { selectUser } from '../../Redux/User/UserSelector';
@@ -14,6 +28,7 @@ import GardenGrid from './GardenGrid';
 const Garden: React.FC = () => {
   const dispatch = useAppDispatch();
   const garden = useAppSelector(selectGarden);
+  const tempGarden = useAppSelector(selectTempGarden);
   const activeUser = useAppSelector(selectUser);
   const isLoading = useAppSelector(selectGardenLoading);
   const error = useAppSelector(selectGardenError);
@@ -21,46 +36,49 @@ const Garden: React.FC = () => {
   const allPlants = useAppSelector(selectAllPlants);
 
   const [isEditMode, setIsEditMode] = useState(false);
-  const [tempXSize, setTempXSize] = useState(garden?.xSize || 5);
-  const [tempYSize, setTempYSize] = useState(garden?.ySize || 5);
 
   useEffect(() => {
     dispatch(fetchUserGarden(activeUser.id));
   }, [dispatch, activeUser.id]);
 
-  useEffect(() => {
-    if (garden) {
-      setTempXSize(garden.xSize);
-      setTempYSize(garden.ySize);
-    }
-  }, [garden]);
-
   // Calculate plants that would be removed with current size settings
   const plantsAtRisk = useMemo(() => {
-    if (!garden) return 0;
+    if (!garden || !tempGarden) return 0;
     
-    return garden.gardenPlants.filter(
-      plant => plant.positionX >= tempXSize || plant.positionY >= tempYSize
+    return tempGarden.plants.filter(
+      plant => 
+        plant.operation !== 'remove' && 
+        (plant.positionX >= tempGarden.xSize || plant.positionY >= tempGarden.ySize)
     ).length;
-  }, [garden, tempXSize, tempYSize]);
+  }, [garden, tempGarden]);
 
   const handleShowCreateForm = () => {
     dispatch(toggleCreateGardenForm());
   };
 
+  const handleEnterEditMode = () => {
+    dispatch(initializeEditMode());
+    setIsEditMode(true);
+  };
+
   const handlePlantDropped = (x: number, y: number, plantId: number) => {
-    if (!garden) return;
-    const plantAlreadyExists = garden.gardenPlants.some(p => p.positionX === x && p.positionY === y);
-    if (plantAlreadyExists) {
-        console.warn(`Position (<span class="math-inline">\{x\},</span>{y}) is already occupied.`);
-        return;
-    };
-  
-    dispatch(addPlantToGarden({ plantId, positionX: x, positionY: y }));
+    if (!garden || !tempGarden) return;
+    
+    // Find the plant in available plants to get its name and image
+    const plant = allPlants.find(p => p.id === plantId);
+    if (!plant) return;
+
+    dispatch(addTempPlant({
+      plantId: plantId,
+      plantName: plant.name,
+      positionX: x,
+      positionY: y,
+      base64Image: plant.imageBase64
+    }));
   };
 
   const handleSaveChanges = async () => {
-    if (!garden) return;
+    if (!garden || !tempGarden) return;
     
     // If plants will be removed, show confirmation dialog
     if (plantsAtRisk > 0) {
@@ -70,23 +88,25 @@ const Garden: React.FC = () => {
       }
     }
     
-    if (tempXSize !== garden.xSize || tempYSize !== garden.ySize) {      
-      const newGarden: CreateGardenRequestDTO = { xSize: tempXSize, ySize: tempYSize };
-      await dispatch(updateGarden(newGarden));
+    try {
+      await dispatch(batchUpdateGarden()).unwrap();
       
       // Fetch updated garden to ensure plants are displayed correctly
       await dispatch(fetchUserGarden(activeUser.id));
+      
+      setIsEditMode(false);
+    } catch (error) {
+      console.error("Failed to save changes:", error);
     }
-    
-    setIsEditMode(false);
   };
 
   const handleCancelEdit = () => {
-    if (garden) {
-      setTempXSize(garden.xSize);
-      setTempYSize(garden.ySize);
-    }
+    dispatch(cancelEditMode());
     setIsEditMode(false);
+  };
+
+  const handleSizeChange = (xSize: number, ySize: number) => {
+    dispatch(updateTempGardenSize({ xSize, ySize }));
   };
 
   if (isLoading && !garden) {
@@ -138,33 +158,33 @@ const Garden: React.FC = () => {
   }
 
   return (
-    <div className="garden-container">
+    <div className={`garden-container ${isEditMode ? 'edit-mode' : ''}`}>
       <div className="garden-header">
         <h2 className="garden-title">My Garden</h2>
         <div className="garden-header-details">
           <span className="badge bg-secondary me-2">
-            Size: {isEditMode ? `${tempXSize} × ${tempYSize}` : `${garden.xSize} × ${garden.ySize}`} meters
+            Size: {isEditMode && tempGarden ? `${tempGarden.xSize} × ${tempGarden.ySize}` : `${garden.xSize} × ${garden.ySize}`} meters
           </span>
           <span className="badge bg-success">
-            {garden.gardenPlants.length} plants
+            {isEditMode && tempGarden 
+              ? tempGarden.plants.filter(p => p.operation !== 'remove').length 
+              : garden.gardenPlants.length} plants
           </span>
         </div>
       </div>
 
       <GardenGrid 
         garden={garden}
+        tempGarden={tempGarden}
         onPlantDropped={isEditMode ? handlePlantDropped : () => {}}
         isEditMode={isEditMode}
-        tempXSize={tempXSize}
-        tempYSize={tempYSize}
-        setTempXSize={isEditMode ? setTempXSize : undefined}
-        setTempYSize={isEditMode ? setTempYSize : undefined}
         plantsAtRisk={plantsAtRisk}
+        onSizeChange={handleSizeChange}
       />
 
       <div className="garden-actions">
         {!isEditMode ? (
-          <button className="btn btn-success" onClick={() => setIsEditMode(true)}>
+          <button className="btn btn-success" onClick={handleEnterEditMode}>
             Edit Garden
           </button>
         ) : (
@@ -172,10 +192,15 @@ const Garden: React.FC = () => {
             <button 
               className={`btn ${plantsAtRisk > 0 ? 'btn-warning' : 'btn-primary'}`} 
               onClick={handleSaveChanges}
+              disabled={isLoading}
             >
-              {plantsAtRisk > 0 ? 'Save (Remove Plants)' : 'Save Changes'}
+              {isLoading ? 'Saving...' : plantsAtRisk > 0 ? 'Save (Remove Plants)' : 'Save Changes'}
             </button>
-            <button className="btn btn-danger" onClick={handleCancelEdit}>
+            <button 
+              className="btn btn-danger" 
+              onClick={handleCancelEdit}
+              disabled={isLoading}
+            >
               Cancel
             </button>
           </div>

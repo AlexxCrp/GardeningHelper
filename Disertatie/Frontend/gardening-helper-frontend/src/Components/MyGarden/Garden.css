@@ -12,6 +12,10 @@
   cursor: grab;
 }
 
+.garden-container.edit-mode .garden-cell.occupied {
+  cursor: grab;
+}
+
 .garden-container.edit-mode .garden-plant {
   border: 1px dashed #66bb6a;
   opacity: 0.9;
@@ -63,33 +67,18 @@
   margin: 0 auto;
 }
 
-.garden-plant {
-  width: 80px;
-  height: 80px;
-  background-color: #2c2c2c;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transition: background-color 0.2s;
-}
-
-.garden-plant:hover {
-  background-color: #353535;
-}
-
 .garden-cell {
   background-color: #3a3a3a;
   border: 1px solid #4a4a4a;
   border-radius: 4px;
-  min-width: 100px;
-  min-height: 100px;
+  width: 100px;
+  height: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: all 0.2s ease;
   position: relative;
+  overflow: hidden;
 }
 
 .garden-cell:hover {
@@ -105,9 +94,9 @@
   height: 100%;
   position: relative;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .cell-remove-btn {
@@ -162,6 +151,12 @@
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #3d3d3d;
+}
+
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
 }
 
 .garden-size-actions {

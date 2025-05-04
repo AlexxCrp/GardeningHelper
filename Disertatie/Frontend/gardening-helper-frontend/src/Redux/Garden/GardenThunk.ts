@@ -4,6 +4,7 @@ import { CreateGardenRequestDTO } from '../../Models/API/DTOs/Auto/Request/creat
 import { GardenPlantResponseDTO } from '../../Models/API/DTOs/Auto/Response/gardenPlantResponseDTO';
 import { UserGardenResponseDTO } from '../../Models/API/DTOs/Auto/Response/userGardenResponseDTO';
 import { GardenService } from '../../Services/GardenService';
+import { RootState } from '../Store';
 
 export const fetchUserGarden = createAsyncThunk<UserGardenResponseDTO | null, string, { rejectValue: string }>(
   'garden/fetchUserGarden',
@@ -36,7 +37,7 @@ export const updateGarden = createAsyncThunk<UserGardenResponseDTO, CreateGarden
     try {
       return await GardenService.updateGarden(gardenData);
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to create garden');
+      return rejectWithValue(error.message || 'Failed to update garden');
     }
   }
 );
@@ -60,6 +61,71 @@ export const removePlantFromGarden = createAsyncThunk<number, number, { rejectVa
       return plantId;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to remove plant');
+    }
+  }
+);
+
+// New thunk for batch updating the garden
+export const batchUpdateGarden = createAsyncThunk<UserGardenResponseDTO, void, { 
+  rejectValue: string, 
+  state: RootState 
+}>(
+  'garden/batchUpdateGarden',
+  async (_, { getState, rejectWithValue, dispatch }) => {
+    try {
+      const state = getState();
+      const { garden, tempGarden } = state.garden;
+      
+      if (!garden || !tempGarden) {
+        return rejectWithValue('No garden or changes to save');
+      }
+      
+      // First, update garden size if needed
+      if (garden.xSize !== tempGarden.xSize || garden.ySize !== tempGarden.ySize) {
+        await dispatch(updateGarden({ 
+          xSize: tempGarden.xSize, 
+          ySize: tempGarden.ySize 
+        })).unwrap();
+      }
+      
+      // Process each plant change in sequence
+      for (const plant of tempGarden.plants) {
+        switch (plant.operation) {
+          case 'add':
+            // Only add if this is a new plant (no ID)
+            if (!plant.id) {
+              await dispatch(addPlantToGarden({
+                plantId: plant.plantId,
+                positionX: plant.positionX,
+                positionY: plant.positionY
+              })).unwrap();
+            }
+            break;
+            
+          case 'move':
+            // For moves, we need to remove the plant first then add it at the new position
+            if (plant.id) {
+              await dispatch(removePlantFromGarden(plant.id)).unwrap();
+              await dispatch(addPlantToGarden({
+                plantId: plant.plantId,
+                positionX: plant.positionX,
+                positionY: plant.positionY
+              })).unwrap();
+            }
+            break;
+            
+          case 'remove':
+            if (plant.id) {
+              await dispatch(removePlantFromGarden(plant.id)).unwrap();
+            }
+            break;
+        }
+      }
+      
+      // Fetch the final state of the garden
+      return await GardenService.getUserGarden();
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to update garden');
     }
   }
 );

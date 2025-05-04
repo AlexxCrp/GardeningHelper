@@ -36,6 +36,7 @@ const Garden: React.FC = () => {
   const allPlants = useAppSelector(selectAllPlants);
 
   const [isEditMode, setIsEditMode] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Add a key to force re-render
 
   useEffect(() => {
     dispatch(fetchUserGarden(activeUser.id));
@@ -95,6 +96,8 @@ const Garden: React.FC = () => {
       await dispatch(fetchUserGarden(activeUser.id));
       
       setIsEditMode(false);
+      // Force re-render to reset all cell styling
+      setRefreshKey(prev => prev + 1);
     } catch (error) {
       console.error("Failed to save changes:", error);
     }
@@ -103,6 +106,8 @@ const Garden: React.FC = () => {
   const handleCancelEdit = () => {
     dispatch(cancelEditMode());
     setIsEditMode(false);
+    // Force re-render to reset all cell styling
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleSizeChange = (xSize: number, ySize: number) => {
@@ -174,6 +179,7 @@ const Garden: React.FC = () => {
       </div>
 
       <GardenGrid 
+        key={refreshKey} // Add key to force re-mount
         garden={garden}
         tempGarden={tempGarden}
         onPlantDropped={isEditMode ? handlePlantDropped : () => {}}

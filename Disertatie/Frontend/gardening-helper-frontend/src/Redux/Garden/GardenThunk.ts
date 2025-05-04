@@ -65,13 +65,12 @@ export const removePlantFromGarden = createAsyncThunk<number, number, { rejectVa
   }
 );
 
-// New thunk for batch updating the garden
 export const batchUpdateGarden = createAsyncThunk<UserGardenResponseDTO, void, { 
   rejectValue: string, 
   state: RootState 
 }>(
   'garden/batchUpdateGarden',
-  async (_, { getState, rejectWithValue, dispatch }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
       const state = getState();
       const { garden, tempGarden } = state.garden;
@@ -80,49 +79,55 @@ export const batchUpdateGarden = createAsyncThunk<UserGardenResponseDTO, void, {
         return rejectWithValue('No garden or changes to save');
       }
       
-      // First, update garden size if needed
+      // Prepare all updates in a single batch
+      const updates: Promise<any>[] = [];
+      
+      // Update garden size if needed
       if (garden.xSize !== tempGarden.xSize || garden.ySize !== tempGarden.ySize) {
-        await dispatch(updateGarden({ 
+        updates.push(GardenService.updateGarden({ 
           xSize: tempGarden.xSize, 
           ySize: tempGarden.ySize 
-        })).unwrap();
+        }));
       }
       
-      // Process each plant change in sequence
+      // Process plant changes
       for (const plant of tempGarden.plants) {
         switch (plant.operation) {
           case 'add':
-            // Only add if this is a new plant (no ID)
             if (!plant.id) {
-              await dispatch(addPlantToGarden({
+              updates.push(GardenService.addPlantToGarden({
                 plantId: plant.plantId,
                 positionX: plant.positionX,
                 positionY: plant.positionY
-              })).unwrap();
+              }));
             }
             break;
             
           case 'move':
-            // For moves, we need to remove the plant first then add it at the new position
             if (plant.id) {
-              await dispatch(removePlantFromGarden(plant.id)).unwrap();
-              await dispatch(addPlantToGarden({
-                plantId: plant.plantId,
-                positionX: plant.positionX,
-                positionY: plant.positionY
-              })).unwrap();
+              updates.push(
+                GardenService.removePlantFromGarden(plant.id)
+                  .then(() => GardenService.addPlantToGarden({
+                    plantId: plant.plantId,
+                    positionX: plant.positionX,
+                    positionY: plant.positionY
+                  }))
+              );
             }
             break;
             
           case 'remove':
             if (plant.id) {
-              await dispatch(removePlantFromGarden(plant.id)).unwrap();
+              updates.push(GardenService.removePlantFromGarden(plant.id));
             }
             break;
         }
       }
       
-      // Fetch the final state of the garden
+      // Execute all updates in parallel
+      await Promise.all(updates);
+      
+      // Return the updated garden state
       return await GardenService.getUserGarden();
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to update garden');

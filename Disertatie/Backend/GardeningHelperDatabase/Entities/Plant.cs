@@ -28,9 +28,6 @@ namespace GardeningHelperDatabase.Entities
         public int WateringThresholdDays { get; set; }
         public double WateringThresholdRainfall { get; set; }
 
-        // Status of the plant (calculated)
-        public StatusEnum Status { get; set; }
-
         // Navigation property to GardenPlant
         public ICollection<GardenPlant> GardenPlants { get; set; }
 

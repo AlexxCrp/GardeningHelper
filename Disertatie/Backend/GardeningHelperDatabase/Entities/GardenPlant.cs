@@ -1,4 +1,6 @@
-﻿namespace GardeningHelperDatabase.Entities
+﻿using DataExchange.Enums;
+
+namespace GardeningHelperDatabase.Entities
 {
     public class GardenPlant
     {
@@ -20,5 +22,6 @@
         public double LastRainfallAmount { get; set; } // Amount of rainfall in mm
         public double LastSoilMoisture { get; set; } // Last recorded soil moisture percentage
         public DateTime LastStatusCheckDate { get; set; } // Date when the status was last checked
+        public StatusEnum Status { get; set; }        // Status of the plant (calculated)
     }
 }

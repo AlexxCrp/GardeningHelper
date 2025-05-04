@@ -31,6 +31,9 @@ namespace GardeningHelperDatabase.Configs
             builder.Property(gp => gp.LastRainfallAmount).HasColumnType("decimal(5,2)");
             builder.Property(gp => gp.LastSoilMoisture).HasColumnType("decimal(5,2)");
             builder.Property(gp => gp.LastStatusCheckDate).IsRequired();
+
+            // Configure status
+            //builder.Property(p => p.Status).IsRequired();
         }
     }
 }

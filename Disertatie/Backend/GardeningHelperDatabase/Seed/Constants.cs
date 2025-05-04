@@ -23,8 +23,7 @@
             ""MinSoilMoisture"": 30.0,
             ""MaxSoilMoisture"": 60.0,
             ""WateringThresholdDays"": 7,
-            ""WateringThresholdRainfall"": 10.0,
-            ""Status"": ""Normal""
+            ""WateringThresholdRainfall"": 10.0
             },
             {
             ""Name"": ""Tulip"",
@@ -43,8 +42,7 @@
             ""MinSoilMoisture"": 20.0,
             ""MaxSoilMoisture"": 50.0,
             ""WateringThresholdDays"": 5,
-            ""WateringThresholdRainfall"": 5.0,
-            ""Status"": ""Normal""
+            ""WateringThresholdRainfall"": 5.0
             },
             {
             ""Name"": ""Lavender"",
@@ -63,8 +61,7 @@
             ""MinSoilMoisture"": 15.0,
             ""MaxSoilMoisture"": 40.0,
             ""WateringThresholdDays"": 10,
-            ""WateringThresholdRainfall"": 5.0,
-            ""Status"": ""Normal""
+            ""WateringThresholdRainfall"": 5.0
             },
             {
             ""Name"": ""Tomato"",
@@ -83,8 +80,7 @@
             ""MinSoilMoisture"": 40.0,
             ""MaxSoilMoisture"": 70.0,
             ""WateringThresholdDays"": 3,
-            ""WateringThresholdRainfall"": 10.0,
-            ""Status"": ""Normal""
+            ""WateringThresholdRainfall"": 10.0
             },
             {
             ""Name"": ""Pepper"",
@@ -103,8 +99,7 @@
             ""MinSoilMoisture"": 35.0,
             ""MaxSoilMoisture"": 65.0,
             ""WateringThresholdDays"": 4,
-            ""WateringThresholdRainfall"": 10.0,
-            ""Status"": ""Normal""
+            ""WateringThresholdRainfall"": 10.0
             },
             {
             ""Name"": ""Cucumber"",
@@ -123,8 +118,7 @@
             ""MinSoilMoisture"": 40.0,
             ""MaxSoilMoisture"": 70.0,
             ""WateringThresholdDays"": 2,
-            ""WateringThresholdRainfall"": 10.0,
-            ""Status"": ""Normal""
+            ""WateringThresholdRainfall"": 10.0
             },
             {
             ""Name"": ""Carrot"",
@@ -143,8 +137,7 @@
             ""MinSoilMoisture"": 30.0,
             ""MaxSoilMoisture"": 60.0,
             ""WateringThresholdDays"": 5,
-            ""WateringThresholdRainfall"": 10.0,
-            ""Status"": ""Normal""
+            ""WateringThresholdRainfall"": 10.0
             },
             {
             ""Name"": ""Potato"",
@@ -163,8 +156,7 @@
             ""MinSoilMoisture"": 35.0,
             ""MaxSoilMoisture"": 65.0,
             ""WateringThresholdDays"": 5,
-            ""WateringThresholdRainfall"": 10.0,
-            ""Status"": ""Normal""
+            ""WateringThresholdRainfall"": 10.0
             }
         ]";
     }

@@ -32,9 +32,6 @@ namespace GardeningHelperDatabase.Configs
             builder.Property(p => p.WateringThresholdDays).IsRequired();
             builder.Property(p => p.WateringThresholdRainfall).HasColumnType("decimal(5,2)");
 
-            // Configure status
-            builder.Property(p => p.Status).IsRequired();
-
             // Navigation property to UserInput
             builder.HasMany(p => p.UserInputs)
                 .WithOne(ui => ui.Plant)

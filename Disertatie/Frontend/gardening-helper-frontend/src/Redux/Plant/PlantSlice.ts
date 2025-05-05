@@ -1,8 +1,9 @@
 // src/Redux/Plant/plantSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PlantDTO } from '../../Models/API/DTOs/Auto/Response/plantDTO';
+import { PlantDetailsResponseDTO } from '../../Models/API/DTOs/Auto/Response/plantDetailsResponseDTO';
 import { PLANTS_INITIAL_STATE } from './PlantState';
-import { createPlant, deletePlant, fetchAllPlants, fetchCardPlants, fetchPlant, updatePlant } from './PlantThunk';
+import { createPlant, deletePlant, fetchAllPlants, fetchCardPlants, fetchPlant, fetchPlantDetails, updatePlant } from './PlantThunk';
 
 const plantSlice = createSlice({
   name: 'plants',
@@ -23,7 +24,11 @@ const plantSlice = createSlice({
       if (index !== -1) {
         state.plants[index] = action.payload;
       }
-    }
+    },
+    // Add a reducer to directly set plant details (useful for manual updates)
+    setPlantDetails: (state, action: PayloadAction<{ plantId: number, details: PlantDetailsResponseDTO }>) => {
+      state.plantDetails[action.payload.plantId] = action.payload.details;
+    },
   },
   extraReducers: (builder) => {
     // Handle fetch single plant
@@ -56,8 +61,7 @@ const plantSlice = createSlice({
       state.error = action.payload as string || 'Failed to fetch plants';
     });
 
-    //Handle fetch Plant Cards
-
+    // Handle fetch Plant Cards
     builder.addCase(fetchCardPlants.pending, (state) => {
       state.isLoading = true;
       state.error = null;
@@ -70,6 +74,22 @@ const plantSlice = createSlice({
     builder.addCase(fetchCardPlants.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload as string || 'Failed to fetch plants';
+    });
+
+    // Handle fetch Plant Details
+    builder.addCase(fetchPlantDetails.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchPlantDetails.fulfilled, (state, action) => {
+      // Store details in the map using PlantId as the key
+      state.plantDetails[action.payload.plantId] = action.payload;
+      state.isLoading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchPlantDetails.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string || 'Failed to fetch plant details';
     });
 
     // Handle create plant
@@ -115,6 +135,10 @@ const plantSlice = createSlice({
     });
     builder.addCase(deletePlant.fulfilled, (state, action) => {
       state.plants = state.plants.filter(p => p.id !== action.meta.arg);
+      // Also clean up any details we might have for this plant
+      if (state.plantDetails[action.meta.arg]) {
+        delete state.plantDetails[action.meta.arg];
+      }
       if (state.selectedPlant?.id === action.meta.arg) {
         state.selectedPlant = null;
       }
@@ -133,7 +157,8 @@ export const {
   setPlantsLoading, 
   setPlantsError,
   setSelectedPlant,
-  updatePlantInList
+  updatePlantInList,
+  setPlantDetails
 } = plantSlice.actions;
 
 export default plantSlice.reducer;

@@ -39,6 +39,12 @@
             return _mapper.Map<PlantDTO>(plant);
         }
 
+        public async Task<PlantDetailsResponseDTO> GetPlantDetails(int id)
+        {
+            var plantDetails = await _dbContext.PlantDetails.FirstOrDefaultAsync(x => x.PlantId == id);
+            return _mapper.Map<PlantDetailsResponseDTO>(plantDetails);
+        }
+
         public async Task<PlantDTO> GetPlantByNameAsync(string name)
         {
             var plant = await _dbContext.Plants.FirstOrDefaultAsync(x => x.Name == name);

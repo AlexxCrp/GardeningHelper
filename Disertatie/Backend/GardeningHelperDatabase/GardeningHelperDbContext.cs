@@ -12,6 +12,7 @@ namespace GardeningHelperDatabase
         UserRole, IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>
     {
         public DbSet<Plant> Plants { get; set; }
+        public DbSet<PlantDetails> PlantDetails { get; set; }
         public DbSet<UserGarden> UserGardens { get; set; }
         public DbSet<GardenPlant> GardenPlants { get; set; }
         public DbSet<UserWeatherData> UserWeatherData { get; set; }
@@ -30,6 +31,7 @@ namespace GardeningHelperDatabase
 
             // Apply configurations
             modelBuilder.ApplyConfiguration(new PlantConfiguration());
+            modelBuilder.ApplyConfiguration(new PlantDetailsConfiguration());
             modelBuilder.ApplyConfiguration(new UserGardenConfiguration());
             modelBuilder.ApplyConfiguration(new GardenPlantConfiguration());
             modelBuilder.ApplyConfiguration(new UserWeatherDataConfiguration());

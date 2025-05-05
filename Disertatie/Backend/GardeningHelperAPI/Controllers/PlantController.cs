@@ -25,9 +25,16 @@
         }
 
         [HttpGet("PlantCard")]
-        public async Task<ActionResult<List<PlantCardDTO>>> GetPlantCards()
+        public async Task<ActionResult<List<PlantDetailsResponseDTO>>> GetPlantCards()
         {
             var plants = await _plantService.GetPlantCards();
+            return Ok(plants);
+        }
+
+        [HttpGet("Details")]
+        public async Task<ActionResult<List<PlantCardDTO>>> GetPlantDetails(int id)
+        {
+            var plants = await _plantService.GetPlantDetails(id);
             return Ok(plants);
         }
 

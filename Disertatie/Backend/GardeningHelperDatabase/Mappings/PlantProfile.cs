@@ -13,6 +13,9 @@ namespace GardeningHelperDatabase.Mappings
 
             CreateMap<Plant, PlantCardDTO>();
             CreateMap<PlantCardDTO, Plant>();
+
+            CreateMap<PlantDetails, PlantDetailsResponseDTO>();
+            CreateMap<PlantDetailsResponseDTO, PlantDetails>();
         }
     }
 }

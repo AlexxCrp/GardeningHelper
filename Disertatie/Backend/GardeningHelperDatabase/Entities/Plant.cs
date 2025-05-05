@@ -6,8 +6,6 @@ namespace GardeningHelperDatabase.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
-        public string CareInstructions { get; set; }
         public SunlightRequirementsEnum SunlightRequirements { get; set; }
         public SoilTypeEnum SoilType { get; set; }
         public string GrowthPeriod { get; set; }
@@ -33,5 +31,8 @@ namespace GardeningHelperDatabase.Entities
 
         // Navigation property to UserInput
         public ICollection<UserInput> UserInputs { get; set; } = new List<UserInput>();
+
+        // Navigation property to PlantDetails
+        public PlantDetails Details { get; set; }
     }
 }

@@ -10,8 +10,6 @@ namespace GardeningHelperDatabase.Configs
         {
             builder.HasKey(p => p.Id); // Primary key
             builder.Property(p => p.Name).IsRequired().HasMaxLength(100);
-            builder.Property(p => p.Description).HasMaxLength(500);
-            builder.Property(p => p.CareInstructions).HasMaxLength(1000);
             builder.Property(p => p.SunlightRequirements).HasMaxLength(200);
             builder.Property(p => p.SoilType).HasMaxLength(100);
             builder.Property(p => p.GrowthPeriod).HasMaxLength(100);

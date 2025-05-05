@@ -6,6 +6,7 @@ import Login from './Components/Login/Login';
 import Garden from './Components/MyGarden/Garden';
 import NavBar from './Components/NavBar/NavBar';
 import PlantCardContainer from './Components/PlantCardContainer/PlantCardContainer';
+import PlantDetails from './Components/PlantDetails/PlantDetails';
 import Register from './Components/Register/Register';
 
 function App() {
@@ -33,6 +34,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PlantCardContainer />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/plants/:id" 
+              element={
+                <ProtectedRoute>
+                  <PlantDetails />
                 </ProtectedRoute>
               } 
             />

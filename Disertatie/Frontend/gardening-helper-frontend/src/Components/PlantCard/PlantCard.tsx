@@ -1,13 +1,23 @@
+import { useNavigate } from 'react-router-dom';
 import './PlantCard.css';
 
 interface PlantCardProps {
+  id?: number;
   name: string;
   imageBase64: string | null;
 }
 
-const PlantCard: React.FC<PlantCardProps> = ({ name, imageBase64 }) => {
+const PlantCard: React.FC<PlantCardProps> = ({ id, name, imageBase64 }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    if (id) {
+      navigate(`/plants/${id}`);
+    }
+  };
+
   return (
-    <div className="plant-card">
+    <div className="plant-card" onClick={handleCardClick} style={{ cursor: id ? 'pointer' : 'default' }}>
       <div className="card-content">
         <div className="image-container">
           {imageBase64 ? (

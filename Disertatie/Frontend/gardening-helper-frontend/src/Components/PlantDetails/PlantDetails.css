@@ -1,0 +1,231 @@
+.plant-details-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .loading-container,
+  .error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+  }
+  
+  .loading-text {
+    color: #4caf50;
+    font-size: 18px;
+  }
+  
+  .error-text {
+    color: #e74c3c;
+    font-size: 18px;
+  }
+  
+  .back-button {
+    background-color: #2d2d2d;
+    color: #4caf50;
+    border: 1px solid #4caf50;
+    padding: 8px 16px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background-color: #4caf50;
+    color: #1f1f1f;
+  }
+  
+  .back-icon {
+    margin-right: 8px;
+    font-size: 18px;
+  }
+  
+  .plant-details-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .plant-gallery {
+    width: 100%;
+  }
+  
+  .main-image-container {
+    width: 100%;
+    height: 400px;
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  
+  .main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .no-image {
+    color: #888;
+    font-size: 18px;
+  }
+  
+  .thumbnail-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  
+  .thumbnail.active {
+    border-color: #4caf50;
+  }
+  
+  .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .plant-info {
+    flex: 1;
+  }
+  
+  .plant-title {
+    color: #4caf50;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 32px;
+    font-weight: 600;
+  }
+  
+  .quick-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    background-color: #2d2d2d;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  .stat {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 5px;
+  }
+  
+  .stat-value {
+    font-size: 16px;
+    color: #4caf50;
+    font-weight: 500;
+  }
+  
+  .details-section {
+    margin-bottom: 40px;
+  }
+  
+  .details-section h2 {
+    color: #4caf50;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .detail-item {
+    background-color: #2d2d2d;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  .detail-item.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .detail-item h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #4caf50;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  
+  .detail-item p {
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  .detail-list {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .detail-list li {
+    margin-bottom: 5px;
+  }
+  
+  /* Responsive adjustments */
+  @media (min-width: 768px) {
+    .plant-details-content {
+      flex-direction: row;
+    }
+  
+    .plant-gallery {
+      width: 50%;
+      min-width: 300px;
+      max-width: 500px;
+    }
+  
+    .plant-info {
+      width: 50%;
+      padding-left: 30px;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .details-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .quick-stats {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .stat {
+      min-width: 100%;
+    }
+  }

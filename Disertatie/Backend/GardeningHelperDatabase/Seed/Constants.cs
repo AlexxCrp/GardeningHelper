@@ -8,8 +8,6 @@
         [
             {
             ""Name"": ""Rose"",
-            ""Description"": ""Roses are one of the most popular flowers in Romania, known for their beauty and fragrance. They require regular care and pruning."",
-            ""CareInstructions"": ""Plant in well-drained soil with full sunlight. Water deeply once a week. Prune in early spring to promote growth."",
             ""SunlightRequirements"": ""FullSun"",
             ""SoilType"": ""Loamy"",
             ""GrowthPeriod"": ""5-9"",
@@ -27,8 +25,6 @@
             },
             {
             ""Name"": ""Tulip"",
-            ""Description"": ""Tulips are vibrant spring flowers that thrive in cooler climates. They are popular in Romanian gardens for their bright colors."",
-            ""CareInstructions"": ""Plant bulbs in well-drained soil in fall. Water moderately during growth. Remove spent flowers to encourage bulb growth."",
             ""SunlightRequirements"": ""FullSun"",
             ""SoilType"": ""Sandy"",
             ""GrowthPeriod"": ""3-6"",
@@ -46,8 +42,6 @@
             },
             {
             ""Name"": ""Lavender"",
-            ""Description"": ""Lavender is a fragrant herb that thrives in sunny, dry conditions. It is popular in Romania for its aroma and medicinal properties."",
-            ""CareInstructions"": ""Plant in well-drained soil with full sunlight. Water sparingly. Prune after flowering to maintain shape."",
             ""SunlightRequirements"": ""FullSun"",
             ""SoilType"": ""Sandy"",
             ""GrowthPeriod"": ""5-9"",
@@ -65,8 +59,6 @@
             },
             {
             ""Name"": ""Tomato"",
-            ""Description"": ""Tomatoes are a staple in Romanian gardens. They require regular watering and sunlight to produce juicy fruits."",
-            ""CareInstructions"": ""Plant in well-drained soil with full sunlight. Water regularly, especially during fruiting. Support with stakes or cages."",
             ""SunlightRequirements"": ""FullSun"",
             ""SoilType"": ""Loamy"",
             ""GrowthPeriod"": ""5-9"",
@@ -84,8 +76,6 @@
             },
             {
             ""Name"": ""Pepper"",
-            ""Description"": ""Peppers are a popular vegetable in Romania, known for their versatility in cooking. They thrive in warm, sunny conditions."",
-            ""CareInstructions"": ""Plant in well-drained soil with full sunlight. Water regularly. Mulch to retain soil moisture."",
             ""SunlightRequirements"": ""FullSun"",
             ""SoilType"": ""Loamy"",
             ""GrowthPeriod"": ""5-9"",
@@ -103,8 +93,6 @@
             },
             {
             ""Name"": ""Cucumber"",
-            ""Description"": ""Cucumbers are a refreshing vegetable that grows well in Romanian gardens. They require consistent watering and support for climbing."",
-            ""CareInstructions"": ""Plant in well-drained soil with full sunlight. Water regularly. Provide trellises for climbing varieties."",
             ""SunlightRequirements"": ""FullSun"",
             ""SoilType"": ""Loamy"",
             ""GrowthPeriod"": ""5-9"",
@@ -122,8 +110,6 @@
             },
             {
             ""Name"": ""Carrot"",
-            ""Description"": ""Carrots are a root vegetable that grows well in Romanian soil. They require loose, sandy soil for proper root development."",
-            ""CareInstructions"": ""Plant in loose, sandy soil with full sunlight. Water regularly. Thin seedlings to prevent overcrowding."",
             ""SunlightRequirements"": ""FullSun"",
             ""SoilType"": ""Sandy"",
             ""GrowthPeriod"": ""4-9"",
@@ -141,8 +127,6 @@
             },
             {
             ""Name"": ""Potato"",
-            ""Description"": ""Potatoes are a staple crop in Romania. They grow best in cool climates and require well-drained soil."",
-            ""CareInstructions"": ""Plant in well-drained soil with full sunlight. Water regularly. Hill soil around plants to protect tubers."",
             ""SunlightRequirements"": ""FullSun"",
             ""SoilType"": ""Loamy"",
             ""GrowthPeriod"": ""4-9"",

@@ -21,9 +21,20 @@ interface GardenCellProps {
   onDropPlant: (x: number, y: number, plantId: number, plantName: string, imageBase64?: string | null) => void;
   isEditMode: boolean;
   isTempPlant?: boolean;
+  onPlantClick?: (plant: GardenPlantResponseDTO) => void;
+  isSelected?: boolean; // New prop to indicate if this plant is currently selected
 }
 
-const GardenCell: React.FC<GardenCellProps> = ({ x, y, plant, isEditMode, onDropPlant, isTempPlant = false }) => {
+const GardenCell: React.FC<GardenCellProps> = ({ 
+  x, 
+  y, 
+  plant, 
+  isEditMode, 
+  onDropPlant, 
+  isTempPlant = false,
+  onPlantClick,
+  isSelected = false // Default to false
+}) => {
   const dispatch = useAppDispatch();
   const cellRef = useRef<HTMLDivElement>(null);
   
@@ -33,14 +44,18 @@ const GardenCell: React.FC<GardenCellProps> = ({ x, y, plant, isEditMode, onDrop
       // Reset any inline styles that might have been applied during drag operations
       cellRef.current.style.border = '';
       
-      // Set the appropriate background color based on whether there's a plant
+      // Set the appropriate background color based on whether there's a plant and if it's selected
       if (plant) {
-        cellRef.current.style.backgroundColor = '#2d4a2e'; // Green for occupied cells
+        if (isSelected) {
+          cellRef.current.style.backgroundColor = '#3e6d40'; // Brighter green for selected
+        } else {
+          cellRef.current.style.backgroundColor = '#2d4a2e'; // Green for occupied cells
+        }
       } else {
         cellRef.current.style.backgroundColor = '#3a3a3a'; // Default for empty cells
       }
     }
-  }, [plant, isEditMode]);
+  }, [plant, isEditMode, isSelected]);
   
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -57,13 +72,21 @@ const GardenCell: React.FC<GardenCellProps> = ({ x, y, plant, isEditMode, onDrop
   
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.currentTarget.style.border = '';
-    e.currentTarget.style.backgroundColor = plant ? '#2d4a2e' : '#3a3a3a';
+    if (isSelected && plant) {
+      e.currentTarget.style.backgroundColor = '#3e6d40'; // Restore selected state
+    } else {
+      e.currentTarget.style.backgroundColor = plant ? '#2d4a2e' : '#3a3a3a';
+    }
   };
   
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.currentTarget.style.border = '';
-    e.currentTarget.style.backgroundColor = plant ? '#2d4a2e' : '#3a3a3a';
+    if (isSelected && plant) {
+      e.currentTarget.style.backgroundColor = '#3e6d40'; // Restore selected state
+    } else {
+      e.currentTarget.style.backgroundColor = plant ? '#2d4a2e' : '#3a3a3a';
+    }
     
     // Don't allow dropping on occupied cells
     if (plant) return;
@@ -123,7 +146,11 @@ const GardenCell: React.FC<GardenCellProps> = ({ x, y, plant, isEditMode, onDrop
     e.currentTarget.classList.remove('dragging');
     // Restore proper background color
     if (cellRef.current) {
-      cellRef.current.style.backgroundColor = plant ? '#2d4a2e' : '#3a3a3a';
+      if (isSelected && plant) {
+        cellRef.current.style.backgroundColor = '#3e6d40'; // Restore selected state
+      } else {
+        cellRef.current.style.backgroundColor = plant ? '#2d4a2e' : '#3a3a3a';
+      }
     }
   };
 
@@ -147,16 +174,28 @@ const GardenCell: React.FC<GardenCellProps> = ({ x, y, plant, isEditMode, onDrop
     return plant.base64Image || null;
   };
 
+  // Handle click on a plant cell
+  const handleCellClick = () => {
+    if (!isEditMode && plant && isGardenPlantResponseDTO(plant) && onPlantClick) {
+      onPlantClick(plant);
+    }
+  };
+
+  // Determine if this cell should be clickable
+  const isClickable = !isEditMode && plant && isGardenPlantResponseDTO(plant) && onPlantClick;
+
   return (
     <div 
       ref={cellRef}
-      className={`garden-cell ${plant ? 'occupied' : ''}`}
+      className={`garden-cell ${plant ? 'occupied' : ''} ${isClickable ? 'clickable' : ''} ${isSelected ? 'selected' : ''}`}
       onDragOver={isEditMode ? handleDragOver : undefined}
       onDragLeave={isEditMode ? handleDragLeave : undefined}
       onDrop={isEditMode ? handleDrop : undefined}
       draggable={isEditMode && plant ? true : false}
       onDragStart={isEditMode && plant ? handleDragStart : undefined}
       onDragEnd={handleDragEnd}
+      onClick={handleCellClick}
+      title={isClickable ? "Click to view plant details" : ""}
     >
       {plant ? (
         <div className="garden-cell-content">

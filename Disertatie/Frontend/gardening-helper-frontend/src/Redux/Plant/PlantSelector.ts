@@ -10,6 +10,10 @@ export const selectPlantCards = (state: RootState) => state.plants.plantCards;
 export const selectPlantById = (id: number) => (state: RootState) => 
   state.plants.plants.find(plant => plant.id === id);
 
+// Select a specific plant by name
+export const selectPlantByName = (name: string) => (state: RootState) => 
+  state.plants.plants.find(plant => plant.name === name);
+
 // Select the currently selected plant
 export const selectSelectedPlant = (state: RootState) => state.plants.selectedPlant;
 

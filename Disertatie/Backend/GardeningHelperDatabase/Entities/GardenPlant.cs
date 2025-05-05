@@ -16,7 +16,7 @@ namespace GardeningHelperDatabase.Entities
         // Plant-specific data
         public int PositionX { get; set; } // X position in the garden grid
         public int PositionY { get; set; } // Y position in the garden grid
-        public int DaysToWateringCounter { get; set; } // Days since last watering
+        public int DaysToWateringCounter { get; set; } // Days to next watering
         public DateTime LastWateredDate { get; set; } // Date when the plant was last watered
         public DateTime LastRainfallDate { get; set; } // Date when it last rained
         public double LastRainfallAmount { get; set; } // Amount of rainfall in mm

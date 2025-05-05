@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { GardenPlantResponseDTO } from '../../Models/API/DTOs/Auto/Response/gardenPlantResponseDTO';
 import {
   selectGarden,
   selectGardenError,
@@ -22,6 +23,7 @@ import { selectAllPlants } from '../../Redux/Plant/PlantSelector';
 import { selectUser } from '../../Redux/User/UserSelector';
 import AvailablePlants from './AvailablePlants';
 import CreateGardenForm from './CreateGardenForm';
+import ExpandedPlantView from './ExpandedPlantView';
 import './Garden.css';
 import GardenGrid from './GardenGrid';
 
@@ -37,6 +39,7 @@ const Garden: React.FC = () => {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Add a key to force re-render
+  const [selectedPlant, setSelectedPlant] = useState<GardenPlantResponseDTO | null>(null);
 
   useEffect(() => {
     dispatch(fetchUserGarden(activeUser.id));
@@ -60,6 +63,8 @@ const Garden: React.FC = () => {
   const handleEnterEditMode = () => {
     dispatch(initializeEditMode());
     setIsEditMode(true);
+    // Close the expanded view if open when entering edit mode
+    setSelectedPlant(null);
   };
 
   const handlePlantDropped = (x: number, y: number, plantId: number) => {
@@ -112,6 +117,16 @@ const Garden: React.FC = () => {
 
   const handleSizeChange = (xSize: number, ySize: number) => {
     dispatch(updateTempGardenSize({ xSize, ySize }));
+  };
+
+  // Handle plant selection for expanded view
+  const handlePlantClick = (plant: GardenPlantResponseDTO) => {
+    setSelectedPlant(plant);
+  };
+
+  // Handle closing the expanded view
+  const handleCloseExpandedView = () => {
+    setSelectedPlant(null);
   };
 
   if (isLoading && !garden) {
@@ -186,7 +201,17 @@ const Garden: React.FC = () => {
         isEditMode={isEditMode}
         plantsAtRisk={plantsAtRisk}
         onSizeChange={handleSizeChange}
+        onPlantClick={handlePlantClick} // Pass the handler for plant click
+        selectedPlant={selectedPlant} // Pass the selected plant to highlight it
       />
+
+      {/* Show ExpandedPlantView when a plant is selected */}
+      {selectedPlant && !isEditMode && (
+        <ExpandedPlantView
+          plant={selectedPlant}
+          onClose={handleCloseExpandedView}
+        />
+      )}
 
       <div className="garden-actions">
         {!isEditMode ? (

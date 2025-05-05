@@ -17,6 +17,8 @@ interface GardenGridProps {
   isEditMode: boolean;
   plantsAtRisk: number;
   onSizeChange: (x: number, y: number) => void;
+  onPlantClick?: (plant: GardenPlantResponseDTO) => void;
+  selectedPlant?: GardenPlantResponseDTO | null; // New prop to track the selected plant
 }
 
 const GardenGrid: React.FC<GardenGridProps> = ({ 
@@ -25,7 +27,9 @@ const GardenGrid: React.FC<GardenGridProps> = ({
   isEditMode, 
   onPlantDropped,
   plantsAtRisk,
-  onSizeChange
+  onSizeChange,
+  onPlantClick,
+  selectedPlant
 }) => {
   const dispatch = useAppDispatch();
 
@@ -42,6 +46,12 @@ const GardenGrid: React.FC<GardenGridProps> = ({
         plant => plant.positionX === x && plant.positionY === y
       );
     }
+  };
+
+  // Check if a plant at given position is selected
+  const isPlantSelected = (x: number, y: number): boolean => {
+    if (!selectedPlant) return false;
+    return selectedPlant.positionX === x && selectedPlant.positionY === y;
   };
 
   const handlePlantDrop = (x: number, y: number, plantId: number, plantName: string, imageBase64?: string | null) => {
@@ -96,6 +106,8 @@ const GardenGrid: React.FC<GardenGridProps> = ({
             onDropPlant={handlePlantDrop}
             isEditMode={isEditMode}
             isTempPlant={isEditMode && !!tempGarden}
+            onPlantClick={onPlantClick}
+            isSelected={isPlantSelected(x, y)} // Pass whether this cell is selected
           />
         );
       }

@@ -89,6 +89,32 @@
   background-color: #2d4a2e;
 }
 
+/* New styles for clickable cells */
+.garden-cell.occupied.clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.garden-cell.occupied.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  border: 1px solid #4caf50;
+}
+
+.garden-cell.occupied.clickable:hover::after {
+  content: "View Details";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  padding: 3px 0;
+  font-size: 0.7rem;
+  text-align: center;
+  transition: opacity 0.2s ease;
+}
+
 .garden-cell-content {
   width: 100%;
   height: 100%;

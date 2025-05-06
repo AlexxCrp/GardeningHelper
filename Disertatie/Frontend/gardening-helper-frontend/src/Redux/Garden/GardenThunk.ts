@@ -105,14 +105,19 @@ export const batchUpdateGarden = createAsyncThunk<UserGardenResponseDTO, void, {
             
           case 'move':
             if (plant.id) {
-              updates.push(
-                GardenService.removePlantFromGarden(plant.id)
-                  .then(() => GardenService.addPlantToGarden({
-                    plantId: plant.plantId,
+              // Find the original plant in the garden to get its data
+              const originalPlant = garden.gardenPlants.find(p => p.id === plant.id);
+              if (originalPlant) {
+                updates.push(
+                  GardenService.updateGardenPlant({
+                    gardenPlantId: plant.id,
                     positionX: plant.positionX,
-                    positionY: plant.positionY
-                  }))
-              );
+                    positionY: plant.positionY,
+                    lastWateredDate: originalPlant.lastWateredDate || new Date(),
+                    lastSoilMoisture: originalPlant.lastSoilMoisture || 0
+                  })
+                );
+              }
             }
             break;
             

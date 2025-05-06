@@ -90,6 +90,32 @@ namespace GardeningHelperAPI.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> UpdateGardenPlant([FromBody] UpdateGardenPlantRequestDTO request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userName))
+                    return Unauthorized();
+
+                var garden = await _gardenService.UpdateGardenPlantAsync(userName, request);
+                return Ok(garden);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while creating the garden", error = ex.Message });
+            }
+        }
+
         [HttpPost("plants")]
         public async Task<IActionResult> AddPlantToGarden([FromBody] AddPlantToGardenRequestDTO request)
         {

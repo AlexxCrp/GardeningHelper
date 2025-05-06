@@ -12,7 +12,7 @@ const PlantCard: React.FC<PlantCardProps> = ({ id, name, imageBase64 }) => {
 
   const handleCardClick = () => {
     if (id) {
-      navigate(`/plants/${id}`);
+      navigate(`/plants/${id}`, { state: { from: 'PlantCardContainer' } });
     }
   };
 

@@ -1,25 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GardenPlantResponseDTO } from '../../Models/API/DTOs/Auto/Response/gardenPlantResponseDTO';
-import { useAppSelector } from '../../Redux/Hooks/ReduxHooks';
+import { setGardenError, setGardenLoading } from '../../Redux/Garden/GardenSlice';
+import { fetchUserGarden } from '../../Redux/Garden/GardenThunk';
+import { useAppDispatch, useAppSelector } from '../../Redux/Hooks/ReduxHooks';
 import { selectPlantByName } from '../../Redux/Plant/PlantSelector';
+import { selectUser } from '../../Redux/User/UserSelector'; // Import the user selector
+import { GardenService } from '../../Services/GardenService';
 import './ExpandedPlantView.css';
 
 interface ExpandedPlantViewProps {
     plant: GardenPlantResponseDTO;
     onClose: () => void;
+    onPlantUpdated?: () => void;  // Optional callback for when plant is updated
   }
   
-  const ExpandedPlantView: React.FC<ExpandedPlantViewProps> = ({ plant, onClose }) => {
+  const ExpandedPlantView: React.FC<ExpandedPlantViewProps> = ({ plant, onClose, onPlantUpdated }) => {
     const dbPlant = useAppSelector(selectPlantByName(plant.plantName));
+    const activeUser = useAppSelector(selectUser); // Get the active user
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const [localPlant, setLocalPlant] = useState<GardenPlantResponseDTO>(plant);
   
     // Calculate the days since the plant was last watered
     const daysSinceWatered = () => {
-      const lastWatered = new Date(plant.lastWateredDate);
+      const lastWatered = new Date(localPlant.lastWateredDate);
       const today = new Date();
       const differenceInTime = today.getTime() - lastWatered.getTime();
       const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
       return differenceInDays;
     };
+
+    useEffect(() => {
+      setLocalPlant(plant);
+    }, [plant]);
   
     // Calculate days left until watering is needed
     const daysUntilWateringNeeded = () => {
@@ -64,17 +78,74 @@ interface ExpandedPlantViewProps {
         day: 'numeric'
       });
     };
+    
+    // Navigate to plant detail page
+    const handleImageClick = () => {
+      if (dbPlant && dbPlant.id) {
+        navigate(`/plants/${dbPlant.id}`, { state: { from: 'Garden' } });
+      }
+    };
+
+    // Handle watering the plant
+    const handleWaterPlant = async () => {
+      if (!localPlant.id) return;
+      
+      try {
+        dispatch(setGardenLoading(true));
+        
+        // Create a new Date object for the current time
+        const currentDate = new Date();
+        
+        // Update the plant with current date as last watered date
+        const updatedGarden = await GardenService.updateGardenPlant({
+          gardenPlantId: localPlant.id,
+          positionX: localPlant.positionX,
+          positionY: localPlant.positionY,
+          lastWateredDate: currentDate,
+          lastSoilMoisture: localPlant.lastSoilMoisture || 0
+        });
+        
+        // Update local state with the new information
+        const updatedPlant = updatedGarden.gardenPlants.find(p => p.id === localPlant.id);
+        if (updatedPlant) {
+          setLocalPlant(updatedPlant);
+        } else {
+          // If we can't find the updated plant, at least update the date locally
+          setLocalPlant({
+            ...localPlant,
+            lastWateredDate: currentDate
+          });
+        }
+        
+        // Refresh the garden data in Redux store with the user ID
+        dispatch(fetchUserGarden(activeUser.id));
+        
+        // Notify parent component that an update occurred
+        if (onPlantUpdated) {
+          onPlantUpdated();
+        }
+        
+        dispatch(setGardenLoading(false));
+      } catch (error) {
+        dispatch(setGardenError(error instanceof Error ? error.message : 'Failed to water plant'));
+        dispatch(setGardenLoading(false));
+      }
+    };
 
     const wateringStatus = getWateringStatus();
   
     return (
       <div className="expanded-plant-view">
         <div className="expanded-content">
-          <div className="expanded-image-container">
+          <div 
+            className="expanded-image-container clickable-image"
+            onClick={handleImageClick}
+            title="Click to view plant details"
+          >
             {plant.base64Image ? (
               <img 
-                src={plant.base64Image} 
-                alt={plant.plantName} 
+                src={localPlant.base64Image} 
+                alt={localPlant.plantName} 
                 className="expanded-plant-image" 
               />
             ) : (
@@ -83,18 +154,18 @@ interface ExpandedPlantViewProps {
           </div>
           
           <div className="expanded-details">
-            <h2 className="expanded-plant-name">{plant.plantName}</h2>
+            <h2 className="expanded-plant-name">{localPlant.plantName}</h2>
             
             <div className="plant-details-grid">
               <div className="detail-item">
                 <span className="detail-label">Status:</span>
-                <span className="detail-value">{plant.status}</span>
+                <span className="detail-value">{localPlant.status}</span>
               </div>
               
               <div className="detail-item">
                 <span className="detail-label">Last Watered:</span>
                 <span className="detail-value">
-                  {formatDate(plant.lastWateredDate)}
+                  {formatDate(localPlant.lastWateredDate)}
                   <span className="days-ago">({daysSinceWatered()} days ago)</span>
                 </span>
               </div>
@@ -125,13 +196,18 @@ interface ExpandedPlantViewProps {
               
               <div className="detail-item">
                 <span className="detail-label">Position:</span>
-                <span className="detail-value">X: {plant.positionX}, Y: {plant.positionY}</span>
+                <span className="detail-value">X: {localPlant.positionX}, Y: {localPlant.positionY}</span>
               </div>
             </div>
             
             <div className="plant-actions">
-              <button className="btn btn-outline-primary">Water Plant</button>
-              <button className="btn btn-outline-success">Update Status</button>
+              <button 
+                className="btn btn-outline-primary" 
+                onClick={handleWaterPlant}
+                disabled={daysSinceWatered() === 0}
+              >
+                {daysSinceWatered() === 0 ? 'Watered Today' : 'Water Plant'}
+              </button>
             </div>
           </div>
         </div>

@@ -129,6 +129,21 @@ const Garden: React.FC = () => {
     setSelectedPlant(null);
   };
 
+  // Handle plant updated event (from ExpandedPlantView)
+  const handlePlantUpdated = () => {
+    // Refresh the garden data
+    dispatch(fetchUserGarden(activeUser.id));
+    // Update the selected plant with the latest data
+    if (selectedPlant && garden) {
+      const updatedPlant = garden.gardenPlants.find(p => p.id === selectedPlant.id);
+      if (updatedPlant) {
+        setSelectedPlant(updatedPlant);
+      }
+    }
+    // Increment refresh key to force re-render
+    setRefreshKey(prev => prev + 1);
+  };
+
   if (isLoading && !garden) {
     return (
       <div className="garden-container">
@@ -210,6 +225,7 @@ const Garden: React.FC = () => {
         <ExpandedPlantView
           plant={selectedPlant}
           onClose={handleCloseExpandedView}
+          onPlantUpdated={handlePlantUpdated} // Pass the handler for plant updated
         />
       )}
 

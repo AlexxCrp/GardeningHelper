@@ -47,12 +47,31 @@
     font-size: 18px;
   }
   
-  .plant-details-content {
+  /* Header with gallery and summary */
+  .plant-details-header {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    margin-bottom: 40px;
   }
   
+  @media (min-width: 768px) {
+    .plant-details-header {
+      flex-direction: row;
+    }
+    
+    .plant-gallery {
+      width: 45%;
+      min-width: 300px;
+    }
+    
+    .plant-summary {
+      width: 55%;
+      padding-left: 30px;
+    }
+  }
+  
+  /* Gallery styling */
   .plant-gallery {
     width: 100%;
   }
@@ -107,7 +126,8 @@
     object-fit: cover;
   }
   
-  .plant-info {
+  /* Plant summary styling */
+  .plant-summary {
     flex: 1;
   }
   
@@ -120,10 +140,9 @@
   }
   
   .quick-stats {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 15px;
-    margin-bottom: 30px;
     background-color: #2d2d2d;
     padding: 15px;
     border-radius: 8px;
@@ -132,8 +151,6 @@
   .stat {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-width: 120px;
   }
   
   .stat-label {
@@ -148,8 +165,17 @@
     font-weight: 500;
   }
   
+  /* Main content area with full-width sections */
+  .plant-details-main {
+    width: 100%;
+  }
+  
   .details-section {
     margin-bottom: 40px;
+  }
+  
+  .details-section:last-child {
+    margin-bottom: 0;
   }
   
   .details-section h2 {
@@ -161,7 +187,7 @@
   
   .details-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
   }
   
@@ -169,10 +195,12 @@
     background-color: #2d2d2d;
     padding: 15px;
     border-radius: 8px;
+    margin-bottom: 0;
   }
   
   .detail-item.full-width {
     grid-column: 1 / -1;
+    margin-bottom: 0; /* Ensure consistent spacing */
   }
   
   .detail-item h3 {
@@ -198,34 +226,17 @@
   }
   
   /* Responsive adjustments */
-  @media (min-width: 768px) {
-    .plant-details-content {
-      flex-direction: row;
-    }
-  
-    .plant-gallery {
-      width: 50%;
-      min-width: 300px;
-      max-width: 500px;
-    }
-  
-    .plant-info {
-      width: 50%;
-      padding-left: 30px;
-    }
-  }
-  
   @media (max-width: 767px) {
-    .details-grid {
-      grid-template-columns: 1fr;
-    }
-    
     .quick-stats {
-      flex-direction: column;
+      grid-template-columns: 1fr;
       gap: 10px;
     }
     
-    .stat {
-      min-width: 100%;
+    .details-grid {
+      grid-template-columns: 1fr;
     }
+  }
+
+  .mt-15{
+    margin-top: 15px;
   }

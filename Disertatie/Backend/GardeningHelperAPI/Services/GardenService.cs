@@ -93,6 +93,33 @@ namespace Services
             return _mapper.Map<UserGardenResponseDTO>(existingGarden);
         }
 
+        public async Task<UserGardenResponseDTO> UpdateGardenPlantAsync(string userName, UpdateGardenPlantRequestDTO request)
+        {
+            var existingGarden = await _dbContext.UserGardens
+                .Include(x => x.GardenPlants)
+                    .ThenInclude(x => x.Plant)
+                .FirstOrDefaultAsync(g => g.User.UserName == userName);
+
+            var plantToUpdate = existingGarden.GardenPlants.FirstOrDefault(x => x.Id == request.GardenPlantId);
+
+            plantToUpdate.PositionX = request.PositionX;
+            plantToUpdate.PositionY = request.PositionY;
+            plantToUpdate.LastSoilMoisture = request.LastSoilMoisture;
+            plantToUpdate.LastWateredDate = request.LastWateredDate;
+
+            await _dbContext.SaveChangesAsync();
+
+            var response = _mapper.Map<UserGardenResponseDTO>(existingGarden);
+
+            foreach (var gardenPlant in response.GardenPlants)
+            {
+                var plant = await _plantService.GetPlantByNameAsync(gardenPlant.PlantName);
+                gardenPlant.Base64Image = plant.ImageBase64;
+            }
+
+            return response;
+        }
+
         public async Task<GardenPlantResponseDTO> AddPlantToGardenAsync(string userName, AddPlantToGardenRequestDTO request)
         {
             var garden = await _dbContext.UserGardens

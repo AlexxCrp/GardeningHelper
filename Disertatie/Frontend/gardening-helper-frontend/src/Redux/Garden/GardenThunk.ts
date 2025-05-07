@@ -86,7 +86,7 @@ export const batchUpdateGarden = createAsyncThunk<UserGardenResponseDTO, void, {
       if (garden.xSize !== tempGarden.xSize || garden.ySize !== tempGarden.ySize) {
         updates.push(GardenService.updateGarden({ 
           xSize: tempGarden.xSize, 
-          ySize: tempGarden.ySize 
+          ySize: tempGarden.ySize,
         }));
       }
       

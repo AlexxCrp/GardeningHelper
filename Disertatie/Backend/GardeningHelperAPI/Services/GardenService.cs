@@ -62,6 +62,10 @@ namespace Services
                 UserId = user.Id,
                 xSize = request.XSize,
                 ySize = request.YSize,
+                City = request.City,
+                Country = request.Country,
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
                 GardenPlants = new List<GardenPlant>()
             };
 

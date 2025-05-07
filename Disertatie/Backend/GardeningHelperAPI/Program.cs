@@ -1,4 +1,5 @@
 using GardeningHelperAPI.Services;
+using GardeningHelperAPI.Services.Weather;
 using GardeningHelperDatabase;
 using GardeningHelperDatabase.Entities.Identity;
 using GardeningHelperDatabase.Mappings;
@@ -94,8 +95,12 @@ namespace GardeningHelperAPI
             builder.Services.AddScoped<IdentityService>();
             builder.Services.AddScoped<PlantService>();
             builder.Services.AddScoped<GardenService>();
+            builder.Services.Configure<OpenWeatherMapSettings>(builder.Configuration.GetSection("OpenWeatherMap"));
 
-            // Configure authentication
+            builder.Services.AddHttpClient<WeatherAPIClient>();
+
+            builder.Services.AddScoped<WeatherService>();
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

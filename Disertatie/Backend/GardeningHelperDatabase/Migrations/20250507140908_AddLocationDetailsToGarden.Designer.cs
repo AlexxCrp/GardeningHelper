@@ -4,6 +4,7 @@ using GardeningHelperDatabase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GardeningHelperDatabase.Migrations
 {
     [DbContext(typeof(GardeningHelperDbContext))]
-    partial class GardeningHelperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250507140908_AddLocationDetailsToGarden")]
+    partial class AddLocationDetailsToGarden
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -487,9 +490,6 @@ namespace GardeningHelperDatabase.Migrations
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("General")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Humidity")
                         .HasColumnType("decimal(5,2)");

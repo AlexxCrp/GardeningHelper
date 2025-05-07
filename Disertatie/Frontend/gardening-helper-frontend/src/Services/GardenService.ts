@@ -1,6 +1,7 @@
 import { AddPlantToGardenRequestDTO } from "../Models/API/DTOs/Auto/Request/addPlantToGardenRequestDTO";
 import { CreateGardenRequestDTO } from "../Models/API/DTOs/Auto/Request/createGardenRequestDTO";
 import { UpdateGardenPlantRequestDTO } from "../Models/API/DTOs/Auto/Request/updateGardenPlantRequestDTO";
+import { UpdateGardenRequestDTO } from "../Models/API/DTOs/Auto/Request/updateGardenRequestDTO";
 import { GardenPlantResponseDTO } from "../Models/API/DTOs/Auto/Response/gardenPlantResponseDTO";
 import { UserGardenResponseDTO } from "../Models/API/DTOs/Auto/Response/userGardenResponseDTO";
 import GardenApiClient from "./CustomApiClients/GardenApiClient";
@@ -34,7 +35,7 @@ class GardenServiceClass {
     }
   }
 
-  public async updateGarden(request: CreateGardenRequestDTO): Promise<UserGardenResponseDTO> {
+  public async updateGarden(request: UpdateGardenRequestDTO): Promise<UserGardenResponseDTO> {
     try {
       return await GardenApiClient.customPost('/update', request);
     } catch (error) {

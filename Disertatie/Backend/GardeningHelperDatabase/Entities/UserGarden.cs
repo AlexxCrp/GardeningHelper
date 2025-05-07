@@ -11,6 +11,11 @@ namespace GardeningHelperDatabase.Entities
         public int xSize { get; set; }
         public int ySize { get; set; }
 
+        public string City { get; set; }
+        public string Country { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+
         // List of plants in the garden
         public ICollection<GardenPlant> GardenPlants { get; set; }
     }

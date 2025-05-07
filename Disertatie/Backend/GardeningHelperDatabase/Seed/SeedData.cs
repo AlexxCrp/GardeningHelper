@@ -55,6 +55,7 @@ namespace GardeningHelperDatabase.Seed
             }
 
             context.Plants.AddRange(plants);
+            context.SaveChanges();
         }
 
         public static async Task SeedRoles(RoleManager<Role> roleManager)

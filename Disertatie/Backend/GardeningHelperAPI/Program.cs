@@ -91,15 +91,21 @@ namespace GardeningHelperAPI
             builder.Services.AddAutoMapper(typeof(UserProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(PlantProfile).Assembly);
 
+            //Add Configs
+            builder.Services.Configure<WeatherUpdateScheduleSettings>(builder.Configuration.GetSection("WeatherUpdateSchedule"));
+            builder.Services.Configure<OpenWeatherMapSettings>(builder.Configuration.GetSection("OpenWeatherMap"));
+
+            //Add Clients
+            builder.Services.AddHttpClient<WeatherAPIClient>();
+
             // Add custom services
             builder.Services.AddScoped<IdentityService>();
             builder.Services.AddScoped<PlantService>();
             builder.Services.AddScoped<GardenService>();
-            builder.Services.Configure<OpenWeatherMapSettings>(builder.Configuration.GetSection("OpenWeatherMap"));
-
-            builder.Services.AddHttpClient<WeatherAPIClient>();
-
             builder.Services.AddScoped<WeatherService>();
+            builder.Services.AddHostedService<WeatherUpdateBackgroundService>();
+
+
 
             builder.Services.AddAuthentication(options =>
             {

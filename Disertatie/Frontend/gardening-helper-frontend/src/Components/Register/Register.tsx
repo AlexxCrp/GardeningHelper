@@ -10,6 +10,7 @@ import '../Auth/Auth.css';
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -56,6 +57,7 @@ const Register: React.FC = () => {
     
     const userData: RegisterRequestDTO = {
       email: email,
+      phoneNumber: phoneNumber,
       password: password,
       role: 'User' // Hardcoded as 'User'
     };
@@ -93,6 +95,19 @@ const Register: React.FC = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="phoneNumber" className="form-label">Phone Number</label>
+                  <input
+                    type="phoneNumber"
+                    className="form-control auth-input"
+                    id="phoneNumber"
+                    placeholder="Enter your phone number"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                     required
                   />
                 </div>

@@ -54,6 +54,7 @@ namespace GardeningHelperAPI.Services
 
             User newUser = mapper.Map<User>(registerModel);
             newUser.UserName = registerModel.Email;
+            newUser.PhoneNumber = registerModel.PhoneNumber;
 
             var result = await userManager.CreateAsync(newUser, registerModel.Password);
             if (result.Succeeded)

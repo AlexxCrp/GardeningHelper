@@ -47,21 +47,21 @@ namespace GardeningHelperAPI.Controllers
             }
         }
 
-        [HttpPost("trigger-all-users-update")]
-        // CONSIDER: Add authorization here! Only administrators should likely trigger this manually.
-        public async Task<IActionResult> TriggerAllUsersWeatherUpdate()
-        {
-            try
-            {
-                await _backgroundService.TriggerWeatherUpdateForAllUsersAsync();
-                //Add here Status Method call
-                //Add here notification service call
-                return Ok("Weather update process for all users has been triggered.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        //[HttpPost("trigger-all-users-update")]
+        //// CONSIDER: Add authorization here! Only administrators should likely trigger this manually.
+        //public async Task<IActionResult> TriggerAllUsersWeatherUpdate()
+        //{
+        //    try
+        //    {
+        //        await _backgroundService.TriggerWeatherUpdateForAllUsersAsync();
+        //        //Add here Status Method call
+        //        //Add here notification service call
+        //        return Ok("Weather update process for all users has been triggered.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
     }
 }

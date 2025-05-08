@@ -25,10 +25,10 @@ namespace GardeningHelperAPI.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Weather Update Background Service is starting.");
+            _logger.LogInformation("Gardening Helper Background Service is starting.");
 
             stoppingToken.Register(() =>
-                _logger.LogInformation("Weather Update Background Service is stopping."));
+                _logger.LogInformation("Gardening Helper Background Service is stopping."));
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -41,90 +41,119 @@ namespace GardeningHelperAPI.Services
 
                     var delay = nextRunTime - now;
 
-                    _logger.LogInformation($"Next scheduled weather update at: {nextRunTime.ToString("yyyy-MM-dd HH:mm:ss UTC")}");
+                    _logger.LogInformation($"Next scheduled run at: {nextRunTime.ToString("yyyy-MM-dd HH:mm:ss UTC")}");
                     _logger.LogInformation($"Delaying for: {delay.TotalHours:F1} hours ({delay.TotalMinutes:F1} minutes)");
 
                     // Wait until the scheduled time
                     await Task.Delay(delay, stoppingToken);
 
-                    // Trigger the update process
-                    await TriggerWeatherUpdateForAllUsersAsync();
-                    //Add here Status Method call
-                    //Add here notification service call
+                    // Trigger the process for all users/plants
+                    await TriggerDailyUpdatesAsync();
+
+                    // The notification service call would typically happen here,
+                    // after statuses are updated.
+                    // Example: await _notificationService.SendNotificationsForUpdatedPlantsAsync();
 
                 }
                 catch (TaskCanceledException)
                 {
                     // This happens when the application is shutting down gracefully
-                    _logger.LogInformation("Weather Update Background Service task was cancelled.");
+                    _logger.LogInformation("Gardening Helper Background Service task was cancelled.");
                     break; // Exit the loop
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An error occurred while waiting for the next weather update trigger.");
+                    _logger.LogError(ex, "An error occurred while waiting for the next scheduled trigger.");
                     // Wait a bit before trying again to avoid tight loop on error
                     await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
                 }
             }
 
-            _logger.LogInformation("Weather Update Background Service has stopped.");
+            _logger.LogInformation("Gardening Helper Background Service has stopped.");
         }
 
         /// <summary>
-        /// Performs the weather update for all users. Can be called manually or by the scheduler.
+        /// Performs the daily updates: fetch weather for all users, then update status for all plants.
         /// </summary>
-        public async Task TriggerWeatherUpdateForAllUsersAsync()
+        public async Task TriggerDailyUpdatesAsync()
         {
-            _logger.LogInformation("Starting scheduled weather update for all users.");
+            _logger.LogInformation("Starting daily update process (Weather & Plant Status).");
 
-            // Background services run as singletons, but UserManager and DbContext are scoped.
-            // We need to create a service scope manually to get scoped services.
+            // Background services run as singletons, but scoped services (DbContext, UserManager, StatusService)
+            // need a scope created for each unit of work.
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                 var weatherService = scope.ServiceProvider.GetRequiredService<WeatherService>();
+                var plantStatusService = scope.ServiceProvider.GetRequiredService<PlantStatusService>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<GardeningHelperDbContext>();
 
                 try
                 {
+                    // --- Step 1: Fetch and Save Weather for All Users ---
+                    _logger.LogInformation("Starting scheduled weather update for all users.");
                     var allUsers = await userManager.Users.ToListAsync();
-
-
-                    _logger.LogInformation($"Found {allUsers.Count} users to update.");
+                    _logger.LogInformation($"Found {allUsers.Count} users to update weather for.");
 
                     foreach (var user in allUsers)
                     {
                         try
                         {
-                            _logger.LogInformation($"Updating weather for user ID: {user.Id}, Username: {user.UserName}");
-                            bool success = await weatherService.FetchAndSaveCurrentWeatherForUserAsync(user.UserName);
-
-                            if (success)
-                            {
-                                _logger.LogInformation($"Successfully updated weather for user ID: {user.Id}");
-                            }
-                            else
-                            {
-                                _logger.LogWarning($"Failed to update weather for user ID: {user.Id}. See previous logs for details.");
-                            }
+                            // Assuming WeatherService handles logging internally
+                            await weatherService.FetchAndSaveCurrentWeatherForUserAsync(user.UserName);
                         }
-                        catch (Exception userEx)
+                        catch (Exception userWeatherEx)
                         {
-                            _logger.LogError(userEx, $"An error occurred while updating weather for user ID: {user.Id}");
+                            _logger.LogError(userWeatherEx, $"An error occurred while updating weather for user ID: {user.Id}, Username: {user.UserName}. Skipping to next user.");
+                        }
+                    }
+                    _logger.LogInformation("Scheduled weather update for all users finished.");
+
+
+                    // --- Step 2: Update Status for All Garden Plants ---
+                    _logger.LogInformation("Starting plant status update for all garden plants.");
+
+                    // Fetch all GardenPlants. Include Plant details needed by the StatusService
+                    var allGardenPlants = await dbContext.GardenPlants
+                                                         .Include(gp => gp.Plant) // StatusService needs Plant thresholds
+                                                         .Include(gp => gp.UserGarden) // StatusService needs UserGarden.UserId for weather
+                                                         .ToListAsync();
+
+                    _logger.LogInformation($"Found {allGardenPlants.Count} garden plants to assess.");
+
+                    foreach (var gardenPlant in allGardenPlants)
+                    {
+                        try
+                        {
+                            // Update status for each plant
+                            await plantStatusService.UpdatePlantStatusAsync(gardenPlant.Id);
+                        }
+                        catch (Exception plantStatusEx)
+                        {
+                            _logger.LogError(plantStatusEx, $"An error occurred while updating status for GardenPlant ID: {gardenPlant.Id} (Plant: {gardenPlant.Plant?.Name ?? "Unknown"}). Skipping to next plant.");
                         }
                     }
 
-                    _logger.LogInformation("Scheduled weather update for all users finished.");
+                    _logger.LogInformation("Plant status update for all garden plants finished.");
+
+                    // --- Step 3: Trigger Notifications (Placeholder) ---
+                    // This would be where you call a notification service
+                    // Example: var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    // Example: await notificationService.GenerateAndSendNotificationsAsync();
+                    _logger.LogInformation("Notification trigger point reached (Notification service call omitted in this example).");
+
 
                 }
                 catch (Exception scopeEx)
                 {
-                    _logger.LogError(scopeEx, "An error occurred within the service scope during the weather update.");
+                    _logger.LogError(scopeEx, "An error occurred within the service scope during the daily update process.");
                 }
             }
+
+            _logger.LogInformation("Daily update process completed.");
         }
 
-        //Add here Status Method call
-        //Add here notification service call
+        // The RecordWateringAsync method and others would still live in the PlantStatusService,
+        // as they are triggered by specific user actions, not the daily background service.
     }
 }

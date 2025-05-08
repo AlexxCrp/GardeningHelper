@@ -26,8 +26,7 @@ interface ExpandedPlantViewProps {
     const daysSinceWatered = () => {
       const lastWatered = new Date(localPlant.lastWateredDate);
       const today = new Date();
-      const differenceInTime = today.getTime() - lastWatered.getTime();
-      const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
+      const differenceInDays = today.getDay() - lastWatered.getDay();
       return differenceInDays;
     };
 

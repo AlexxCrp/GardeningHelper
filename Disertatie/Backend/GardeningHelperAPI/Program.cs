@@ -103,7 +103,8 @@ namespace GardeningHelperAPI
             builder.Services.AddScoped<PlantService>();
             builder.Services.AddScoped<GardenService>();
             builder.Services.AddScoped<WeatherService>();
-            builder.Services.AddHostedService<BackgroundService>();
+            builder.Services.AddScoped<PlantStatusService>();
+            builder.Services.AddHostedService<GardenBackgroundService>();
 
 
 

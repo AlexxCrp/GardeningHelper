@@ -1,19 +1,20 @@
-﻿using GardeningHelperDatabase;
+﻿using GardeningHelperAPI.Services.Weather;
+using GardeningHelperDatabase;
 using GardeningHelperDatabase.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace GardeningHelperAPI.Services.Weather
+namespace GardeningHelperAPI.Services
 {
-    public class WeatherUpdateBackgroundService : BackgroundService
+    public class GardenBackgroundService : BackgroundService
     {
-        private readonly ILogger<WeatherUpdateBackgroundService> _logger;
+        private readonly ILogger<GardenBackgroundService> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory; // Used to create a new scope for each run
         private readonly WeatherUpdateScheduleSettings _scheduleSettings;
 
-        public WeatherUpdateBackgroundService(
-            ILogger<WeatherUpdateBackgroundService> logger,
+        public GardenBackgroundService(
+            ILogger<GardenBackgroundService> logger,
             IServiceScopeFactory serviceScopeFactory,
             IOptions<WeatherUpdateScheduleSettings> scheduleSettings)
         {
@@ -36,7 +37,7 @@ namespace GardeningHelperAPI.Services.Weather
                     // Calculate the time until the next scheduled run (UTC)
                     var now = DateTime.UtcNow;
                     var scheduledTimeToday = now.Date.AddHours(_scheduleSettings.Hour).AddMinutes(_scheduleSettings.Minute);
-                    var nextRunTime = (scheduledTimeToday > now) ? scheduledTimeToday : scheduledTimeToday.AddDays(1);
+                    var nextRunTime = scheduledTimeToday > now ? scheduledTimeToday : scheduledTimeToday.AddDays(1);
 
                     var delay = nextRunTime - now;
 

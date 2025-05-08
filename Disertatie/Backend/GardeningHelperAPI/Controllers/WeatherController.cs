@@ -1,4 +1,5 @@
-﻿using GardeningHelperAPI.Services.Weather;
+﻿using GardeningHelperAPI.Services;
+using GardeningHelperAPI.Services.Weather;
 using GardeningHelperDatabase.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,10 @@ namespace GardeningHelperAPI.Controllers
     {
         private readonly WeatherService _weatherService;
         private readonly UserManager<User> _userManager;
-        private readonly WeatherUpdateBackgroundService _backgroundService;
+        private readonly GardenBackgroundService _backgroundService;
 
         // Inject the background service instance
-        public WeatherController(WeatherService weatherService, UserManager<User> userManager, WeatherUpdateBackgroundService backgroundService, ILogger<WeatherController> logger = null)
+        public WeatherController(WeatherService weatherService, UserManager<User> userManager, GardenBackgroundService backgroundService, ILogger<WeatherController> logger = null)
         {
             _weatherService = weatherService;
             _userManager = userManager;

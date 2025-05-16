@@ -20,6 +20,7 @@ import {
 } from '../../Redux/Garden/GardenThunk';
 import { useAppDispatch, useAppSelector } from '../../Redux/Hooks/ReduxHooks';
 import { selectAllPlants } from '../../Redux/Plant/PlantSelector';
+import { fetchAllPlants } from '../../Redux/Plant/PlantThunk';
 import { selectUser } from '../../Redux/User/UserSelector';
 import AvailablePlants from './AvailablePlants';
 import CreateGardenForm from './CreateGardenForm';
@@ -43,6 +44,7 @@ const Garden: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchUserGarden(activeUser.id));
+    dispatch(fetchAllPlants());
   }, [dispatch, activeUser.id]);
 
   // Calculate plants that would be removed with current size settings

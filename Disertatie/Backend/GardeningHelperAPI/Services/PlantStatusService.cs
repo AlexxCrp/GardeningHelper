@@ -1,4 +1,5 @@
-﻿using DataExchange.Enums;
+﻿// GardeningHelperAPI/Services/PlantStatusService.cs
+using DataExchange.Enums;
 using GardeningHelperAPI.Services.Weather;
 using GardeningHelperDatabase;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,10 @@ namespace GardeningHelperAPI.Services
                 return null;
             }
 
+            // Store the current status as the previous status BEFORE calculating the new one
+            gardenPlant.PreviousStatus = gardenPlant.Status;
+            gardenPlant.StatusChangeReason = null; // Clear previous reason
+
             var plant = gardenPlant.Plant;
             if (plant == null)
             {
@@ -69,7 +74,7 @@ namespace GardeningHelperAPI.Services
             // --- Prioritize AtRisk status for critical conditions ---
 
             bool isAtRisk = false;
-            string atRiskReason = "";
+            string atRiskReason = ""; // Reason for being AtRisk
 
             if (latestWeatherData != null)
             {
@@ -77,30 +82,30 @@ namespace GardeningHelperAPI.Services
                 if (latestWeatherData.Temperature < plant.MinTemperature)
                 {
                     isAtRisk = true;
-                    atRiskReason = "Temperature below minimum threshold.";
-                    _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason} (Temp: {latestWeatherData.Temperature}°C, Min: {plant.MinTemperature}°C)");
+                    atRiskReason = $"Temperature ({latestWeatherData.Temperature}°C) below minimum threshold ({plant.MinTemperature}°C).";
+                    _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason}");
                 }
                 else if (latestWeatherData.Temperature > plant.MaxTemperature)
                 {
                     isAtRisk = true;
-                    atRiskReason = "Temperature above maximum threshold.";
-                    _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason} (Temp: {latestWeatherData.Temperature}°C, Max: {plant.MaxTemperature}°C)");
+                    atRiskReason = $"Temperature ({latestWeatherData.Temperature}°C) above maximum threshold ({plant.MaxTemperature}°C).";
+                    _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason}");
                 }
 
                 // Humidity check (if not already AtRisk from temperature)
                 if (!isAtRisk && (latestWeatherData.Humidity < plant.MinHumidity || latestWeatherData.Humidity > plant.MaxHumidity))
                 {
                     isAtRisk = true;
-                    atRiskReason = "Humidity outside acceptable range.";
-                    _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason} (Humidity: {latestWeatherData.Humidity}%, Range: {plant.MinHumidity}-{plant.MaxHumidity}%)");
+                    atRiskReason = $"Humidity ({latestWeatherData.Humidity}%) outside acceptable range ({plant.MinHumidity}-{plant.MaxHumidity}%).";
+                    _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason}");
                 }
 
                 // Excessive Rainfall check (if not already AtRisk)
                 if (!isAtRisk && latestWeatherData.Rainfall > plant.MaxRainfall)
                 {
                     isAtRisk = true;
-                    atRiskReason = "Excessive rainfall today.";
-                    _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason} (Rain: {latestWeatherData.Rainfall}mm, Max: {plant.MaxRainfall}mm)");
+                    atRiskReason = $"Excessive rainfall detected today ({latestWeatherData.Rainfall}mm), maximum recommended is ({plant.MaxRainfall}mm).";
+                    _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason}");
                 }
             }
 
@@ -109,27 +114,30 @@ namespace GardeningHelperAPI.Services
             if (!isAtRisk && gardenPlant.LastSoilMoisture > 0 && gardenPlant.LastSoilMoisture > plant.MaxSoilMoisture)
             {
                 isAtRisk = true;
-                atRiskReason = "Soil moisture above maximum threshold (potential overwatering).";
-                _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason} (Soil Moisture: {gardenPlant.LastSoilMoisture}%, Max: {plant.MaxSoilMoisture}%)");
+                atRiskReason = $"Soil moisture ({gardenPlant.LastSoilMoisture}%) above maximum threshold ({plant.MaxSoilMoisture}%) (potential overwatering).";
+                _logger.LogWarning($"Plant {plant.Name} (ID: {gardenPlant.Id}) AtRisk: {atRiskReason}");
             }
 
 
             if (isAtRisk)
             {
                 newStatus = StatusEnum.AtRisk;
+                gardenPlant.StatusChangeReason = atRiskReason; // Set the reason
             }
             else
             {
                 // --- If not AtRisk, check for NeedsWatering ---
 
                 bool needsWatering = false;
+                string needsWateringReason = ""; // Reason for needing watering
 
                 // Check Soil Moisture first (most direct indicator)
                 // Assuming LastSoilMoisture > 0 means valid sensor data
                 if (gardenPlant.LastSoilMoisture > 0 && gardenPlant.LastSoilMoisture < plant.MinSoilMoisture)
                 {
                     needsWatering = true;
-                    _logger.LogInformation($"Plant {plant.Name} (ID: {gardenPlant.Id}) NeedsWatering: Soil moisture below minimum. (Soil Moisture: {gardenPlant.LastSoilMoisture}%, Min: {plant.MinSoilMoisture}%)");
+                    needsWateringReason = $"Soil moisture ({gardenPlant.LastSoilMoisture}%) is below the minimum required ({plant.MinSoilMoisture}%).";
+                    _logger.LogInformation($"Plant {plant.Name} (ID: {gardenPlant.Id}) NeedsWatering: {needsWateringReason}");
                 }
                 else
                 {
@@ -158,37 +166,41 @@ namespace GardeningHelperAPI.Services
                     }
 
                     // If no significant rain today, increment the counter for days since last "watering" event
+                    // Only increment if the last status check wasn't today
                     if (!significantRainToday)
                     {
-                        // Increment counter only if the last check wasn't today
-                        if (gardenPlant.LastStatusCheckDate.Date != DateTime.UtcNow.Date)
+                        if (gardenPlant.LastStatusCheckDate.Date != DateTime.UtcNow.Date) // Prevent double increment on same day runs
                         {
                             gardenPlant.DaysToWateringCounter++;
                             _logger.LogInformation($"Plant {plant.Name} (ID: {gardenPlant.Id}): No significant rain today. Incrementing watering counter to {gardenPlant.DaysToWateringCounter}.");
                         }
                         else
                         {
-                            _logger.LogInformation($"Plant {plant.Name} (ID: {gardenPlant.Id}): Status already checked today ({gardenPlant.LastStatusCheckDate.Date}). Watering counter not incremented.");
+                            _logger.LogInformation($"Plant {plant.Name} (ID: {gardenPlant.Id}): Status already checked today ({gardenPlant.LastStatusCheckDate.Date}). Watering counter not incremented based on time.");
                         }
                     }
+
 
                     // Check if the counter has reached the watering threshold
                     if (gardenPlant.DaysToWateringCounter >= plant.WateringThresholdDays)
                     {
                         needsWatering = true;
-                        _logger.LogInformation($"Plant {plant.Name} (ID: {gardenPlant.Id}) NeedsWatering: Watering threshold ({plant.WateringThresholdDays} days) reached. Counter: {gardenPlant.DaysToWateringCounter}.");
+                        needsWateringReason = $"Has gone {gardenPlant.DaysToWateringCounter} days without watering, exceeding the recommended threshold of {plant.WateringThresholdDays} days.";
+                        _logger.LogInformation($"Plant {plant.Name} (ID: {gardenPlant.Id}) NeedsWatering: {needsWateringReason}");
                     }
                 }
 
                 if (needsWatering)
                 {
                     newStatus = StatusEnum.NeedsWatering;
+                    gardenPlant.StatusChangeReason = needsWateringReason; // Set the reason
                 }
                 else
                 {
                     // If not AtRisk and not NeedsWatering, it's Normal
                     newStatus = StatusEnum.Normal;
                     _logger.LogInformation($"Plant {plant.Name} (ID: {gardenPlant.Id}): Status set to Normal.");
+                    // StatusChangeReason remains null
                 }
             }
 
@@ -200,13 +212,12 @@ namespace GardeningHelperAPI.Services
             try
             {
                 await _dbContext.SaveChangesAsync();
-                _logger.LogInformation($"Successfully updated status for GardenPlant ID: {gardenPlantId} to {newStatus}.");
+                _logger.LogInformation($"Successfully updated status for GardenPlant ID: {gardenPlantId} from {gardenPlant.PreviousStatus} to {newStatus}. Reason: {gardenPlant.StatusChangeReason ?? "N/A"}");
                 return newStatus;
             }
             catch (Exception dbEx)
             {
                 _logger.LogError(dbEx, $"Failed to save status update for GardenPlant ID: {gardenPlantId}.");
-                // Handle database saving errors
                 throw; // Re-throw or handle appropriately
             }
         }
@@ -220,7 +231,11 @@ namespace GardeningHelperAPI.Services
         public async Task<bool> RecordWateringAsync(int gardenPlantId, double? soilMoistureReading = null)
         {
             _logger.LogInformation($"Recording watering for GardenPlant ID: {gardenPlantId}");
-            var gardenPlant = await _dbContext.GardenPlants.FindAsync(gardenPlantId);
+            var gardenPlant = await _dbContext.GardenPlants
+                 .Include(gp => gp.Plant) // Needed if you want to potentially trigger status update here too
+                 .Include(gp => gp.UserGarden) // Needed if you want to potentially trigger status update here too
+                 .FirstOrDefaultAsync(gp => gp.Id == gardenPlantId);
+
 
             if (gardenPlant == null)
             {
@@ -228,8 +243,12 @@ namespace GardeningHelperAPI.Services
                 return false;
             }
 
+            // Store current status before updating for watering
+            gardenPlant.PreviousStatus = gardenPlant.Status;
             gardenPlant.LastWateredDate = DateTime.UtcNow;
             gardenPlant.DaysToWateringCounter = 0; // Reset counter after watering
+            gardenPlant.StatusChangeReason = null; // Clear reason on watering
+
             if (soilMoistureReading.HasValue)
             {
                 // Assuming soilMoistureReading > 0 means a valid reading
@@ -237,14 +256,38 @@ namespace GardeningHelperAPI.Services
                 _logger.LogInformation($"Recorded soil moisture {soilMoistureReading.Value}% after watering.");
             }
 
-            // Status might change after watering, but we can let the daily status check handle it
-            // Or we could trigger a status update immediately:
-            // Task.Run(() => UpdatePlantStatusAsync(gardenPlantId)); // Run in background
+            // Optionally, update the status immediately after watering.
+            // This prevents the user from seeing "NeedsWatering" right after they watered.
+            // Recalculate status based on new state (watering counter = 0, potentially high soil moisture)
+            // The logic below is similar to UpdatePlantStatusAsync but only considers manual watering impact.
+            StatusEnum newStatusAfterWatering = StatusEnum.Normal;
+            string? newStatusReason = null;
+
+            // After watering, the plant is typically Normal unless there's an extreme condition not resolved by watering
+            // (like extreme temp/humidity, or *excessive* soil moisture from overwatering if sensor data is available)
+
+            if (gardenPlant.LastSoilMoisture > 0 && gardenPlant.LastSoilMoisture > gardenPlant.Plant.MaxSoilMoisture)
+            {
+                newStatusAfterWatering = StatusEnum.AtRisk;
+                newStatusReason = $"Soil moisture ({gardenPlant.LastSoilMoisture}%) is above the maximum threshold ({gardenPlant.Plant.MaxSoilMoisture}%) even after watering (potential overwatering).";
+                _logger.LogWarning($"Plant {gardenPlant.Plant?.Name ?? "Unknown"} (ID: {gardenPlant.Id}) AtRisk after watering: {newStatusReason}");
+            }
+            else
+            {
+                newStatusAfterWatering = StatusEnum.Normal; // Watering usually resolves NeedsWatering
+                newStatusReason = null;
+                _logger.LogInformation($"Plant {gardenPlant.Plant?.Name ?? "Unknown"} (ID: {gardenPlant.Id}): Status set to Normal after watering.");
+            }
+
+
+            gardenPlant.Status = newStatusAfterWatering;
+            gardenPlant.StatusChangeReason = newStatusReason;
+            gardenPlant.LastStatusCheckDate = DateTime.UtcNow; // Record when status was last updated
 
             try
             {
                 await _dbContext.SaveChangesAsync();
-                _logger.LogInformation($"Successfully recorded watering for GardenPlant ID: {gardenPlantId}. Counter reset.");
+                _logger.LogInformation($"Successfully recorded watering for GardenPlant ID: {gardenPlantId}. Counter reset. Status updated to {gardenPlant.Status}.");
                 return true;
             }
             catch (Exception dbEx)

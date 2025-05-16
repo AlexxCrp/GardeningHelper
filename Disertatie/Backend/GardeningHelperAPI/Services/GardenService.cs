@@ -16,14 +16,16 @@ namespace Services
         private readonly GardeningHelperDbContext _dbContext;
         private readonly UserManager<User> _userManager;
         private readonly PlantService _plantService;
+        private readonly PlantStatusService _plantStatusService;
         private readonly IMapper _mapper;
 
-        public GardenService(GardeningHelperDbContext dbContext, UserManager<User> userManager, PlantService plantService, IMapper mapper)
+        public GardenService(GardeningHelperDbContext dbContext, UserManager<User> userManager, PlantService plantService, IMapper mapper, PlantStatusService plantStatusService)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _mapper = mapper;
             _plantService = plantService;
+            _plantStatusService = plantStatusService;
         }
 
         public async Task<UserGardenResponseDTO> GetUserGardenAsync(string userName)
@@ -109,7 +111,10 @@ namespace Services
             plantToUpdate.PositionX = request.PositionX;
             plantToUpdate.PositionY = request.PositionY;
             plantToUpdate.LastSoilMoisture = request.LastSoilMoisture;
-            plantToUpdate.LastWateredDate = request.LastWateredDate;
+            if (plantToUpdate.LastWateredDate != request.LastWateredDate)
+            {
+                await _plantStatusService.RecordWateringAsync(plantToUpdate.Id);
+            }
 
             await _dbContext.SaveChangesAsync();
 

@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="MTT" Version="0.7.2" />
+    <PackageReference Include="SendGrid.Extensions.DependencyInjection" Version="1.0.1" />
   </ItemGroup>
 
     <Target Name="ConvertDataExchangeToTypeScript" AfterTargets="Build">

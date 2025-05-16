@@ -1,4 +1,5 @@
 using GardeningHelperAPI.Services;
+using GardeningHelperAPI.Services.Notifications;
 using GardeningHelperAPI.Services.Weather;
 using GardeningHelperDatabase;
 using GardeningHelperDatabase.Entities.Identity;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SendGrid.Extensions.DependencyInjection;
 using Services;
 using System.Text;
 
@@ -97,6 +99,11 @@ namespace GardeningHelperAPI
 
             //Add Clients
             builder.Services.AddHttpClient<WeatherAPIClient>();
+            builder.Services.AddSendGrid(options =>
+            {
+                options.ApiKey = builder.Configuration.GetSection("EmailSettings")["SendGridApiKey"];
+            });
+
 
             // Add custom services
             builder.Services.AddScoped<IdentityService>();
@@ -104,6 +111,7 @@ namespace GardeningHelperAPI
             builder.Services.AddScoped<GardenService>();
             builder.Services.AddScoped<WeatherService>();
             builder.Services.AddScoped<PlantStatusService>();
+            builder.Services.AddScoped<NotificationService>();
             builder.Services.AddHostedService<GardenBackgroundService>();
 
 

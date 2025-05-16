@@ -21,6 +21,8 @@ namespace GardeningHelperDatabase.Entities
         public DateTime LastRainfallDate { get; set; } // Date when it last rained
         public double LastRainfallAmount { get; set; } // Amount of rainfall in mm
         public double LastSoilMoisture { get; set; } // Last recorded soil moisture percentage
+        public StatusEnum PreviousStatus { get; set; } = StatusEnum.Normal; // Store status BEFORE the last update
+        public string? StatusChangeReason { get; set; } // Store the reason for the current status (e.g., "Temp too low", "Needs watering")
         public DateTime LastStatusCheckDate { get; set; } // Date when the status was last checked
         public StatusEnum Status { get; set; }        // Status of the plant (calculated)
     }

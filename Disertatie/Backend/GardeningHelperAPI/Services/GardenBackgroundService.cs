@@ -1,4 +1,6 @@
-﻿using GardeningHelperAPI.Services.Weather;
+﻿// GardeningHelperAPI/Services/GardenBackgroundService.cs
+using GardeningHelperAPI.Services.Notifications; // Make sure this using is present
+using GardeningHelperAPI.Services.Weather;
 using GardeningHelperDatabase;
 using GardeningHelperDatabase.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -50,10 +52,6 @@ namespace GardeningHelperAPI.Services
                     // Trigger the process for all users/plants
                     await TriggerDailyUpdatesAsync();
 
-                    // The notification service call would typically happen here,
-                    // after statuses are updated.
-                    // Example: await _notificationService.SendNotificationsForUpdatedPlantsAsync();
-
                 }
                 catch (TaskCanceledException)
                 {
@@ -79,7 +77,7 @@ namespace GardeningHelperAPI.Services
         {
             _logger.LogInformation("Starting daily update process (Weather & Plant Status).");
 
-            // Background services run as singletons, but scoped services (DbContext, UserManager, StatusService)
+            // Background services run as singletons, but scoped services (DbContext, UserManager, StatusService, NotificationService)
             // need a scope created for each unit of work.
             using (var scope = _serviceScopeFactory.CreateScope())
             {
@@ -87,6 +85,8 @@ namespace GardeningHelperAPI.Services
                 var weatherService = scope.ServiceProvider.GetRequiredService<WeatherService>();
                 var plantStatusService = scope.ServiceProvider.GetRequiredService<PlantStatusService>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<GardeningHelperDbContext>();
+                var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>(); // **Inject the Notification Service**
+
 
                 try
                 {
@@ -99,7 +99,6 @@ namespace GardeningHelperAPI.Services
                     {
                         try
                         {
-                            // Assuming WeatherService handles logging internally
                             await weatherService.FetchAndSaveCurrentWeatherForUserAsync(user.UserName);
                         }
                         catch (Exception userWeatherEx)
@@ -125,7 +124,6 @@ namespace GardeningHelperAPI.Services
                     {
                         try
                         {
-                            // Update status for each plant
                             await plantStatusService.UpdatePlantStatusAsync(gardenPlant.Id);
                         }
                         catch (Exception plantStatusEx)
@@ -136,11 +134,11 @@ namespace GardeningHelperAPI.Services
 
                     _logger.LogInformation("Plant status update for all garden plants finished.");
 
-                    // --- Step 3: Trigger Notifications (Placeholder) ---
-                    // This would be where you call a notification service
-                    // Example: var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-                    // Example: await notificationService.GenerateAndSendNotificationsAsync();
-                    _logger.LogInformation("Notification trigger point reached (Notification service call omitted in this example).");
+                    // --- Step 3: Trigger Notifications ---
+                    // This calls the notification service to send emails based on status changes
+                    _logger.LogInformation("Triggering notification service.");
+                    await notificationService.SendStatusChangeNotificationsAsync();
+                    _logger.LogInformation("Notification trigger finished.");
 
 
                 }

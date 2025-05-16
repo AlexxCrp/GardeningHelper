@@ -5,6 +5,7 @@ import { setGardenError, setGardenLoading } from '../../Redux/Garden/GardenSlice
 import { fetchUserGarden } from '../../Redux/Garden/GardenThunk';
 import { useAppDispatch, useAppSelector } from '../../Redux/Hooks/ReduxHooks';
 import { selectPlantByName } from '../../Redux/Plant/PlantSelector';
+import { fetchPlant } from '../../Redux/Plant/PlantThunk';
 import { selectUser } from '../../Redux/User/UserSelector'; // Import the user selector
 import { GardenService } from '../../Services/GardenService';
 import './ExpandedPlantView.css';
@@ -16,6 +17,9 @@ interface ExpandedPlantViewProps {
   }
   
   const ExpandedPlantView: React.FC<ExpandedPlantViewProps> = ({ plant, onClose, onPlantUpdated }) => {
+    useEffect(()=>{
+      dispatch(fetchPlant(plant.id));
+    }, [])
     const dbPlant = useAppSelector(selectPlantByName(plant.plantName));
     const activeUser = useAppSelector(selectUser); // Get the active user
     const navigate = useNavigate();
